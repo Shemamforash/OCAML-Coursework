@@ -13,6 +13,8 @@ rule token = parse
     | '/'      { DIV }
     | '('      { LPAREN }
     | ')'      { RPAREN }
-    | '%'      { MODULO }
-    | '^'      { POINTYHAT }
     | eof      { raise Eof }
+    | "read"   { READ }
+    | "write"  { WRITE }
+    | "for"    { FOR }
+    | "list"   { LIST }
