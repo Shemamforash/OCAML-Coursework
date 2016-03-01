@@ -3,10 +3,11 @@
 %token PLUS MINUS TIMES DIV
 %token LPAREN RPAREN
 %token EOL
-%token POINTYHAT MODULO
+%token FOR
+%token <bool> LESSTHAN EQUALTO GREATERTHAN
 %left PLUS MINUS        /* lowest precedence */
 %left TIMES DIV         /* medium precedence */
-%nonassoc UMINUS POINTYHAT MODULO      /* highest precedence */
+%nonassoc UMINUS     /* highest precedence */
 %start main             /* the entry point */
 %type <int> main
 %%
@@ -20,7 +21,12 @@ expr:
  | expr MINUS expr         { $1 - $3 }
  | expr TIMES expr         { $1 * $3 }
  | expr DIV expr           { $1 / $3 }
- | expr POINTYHAT expr     { int_of_float ((float_of_int $1) ** (float_of_int $3)) }
- | expr MODULO expr        { $1 mod  $3}
  | MINUS expr %prec UMINUS { - $2 }
+ | FOR cond expr expr      { while $1 do $2 $3}
+
+;
+cond:
+   INT LESSTHAN INT        { $1 < $3 }
+ | INT GREATERTHAN INT     { $1 > $3 }
+ | INT EQUALTO INT         { $1 == $3 }
 ;
