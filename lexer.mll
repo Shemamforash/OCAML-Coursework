@@ -17,4 +17,3 @@ rule token = parse
     | "read"   { READ }
     | "write"  { WRITE }
     | "for"    { FOR }
-    | "list"   { LIST }
