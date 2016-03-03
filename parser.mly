@@ -1,54 +1,67 @@
 /* File parser.mly */
+%{
+    open Functions
+    open Furyroad
+%}
+
 %token <int> INT
 %token <string> STRING
 %token <bool> BOOL
+%token <list> LIST
 %token PLUS MINUS TIMES DIV
 %token LESSTHAN EQUALTO GREATERTHAN
 %token LPAREN RPAREN
 %token EOL
-%token FOR READ WRITE
-%left LESSTHAN EQUALTO GREATERTHAN
+%token FOR READ WRITE IF ELSE
 %left PLUS MINUS        /* lowest precedence */
 %left TIMES DIV         /* medium precedence */
-%nonassoc UMINUS     /* highest precedence */
+%nonassoc LESSTHAN EQUALTO GREATERTHAN
+%nonassoc UMINUS IF ELSE FOR READ WRITE    /* highest precedence */
 %start main             /* the entry point */
 %type <int> main
 %%
+
 main:
-   expr EOL                { $1 }
+    expr EOL                { $1 }
 ;
+
 expr:
-   type                     { $1 }
-   | numericaloperator      { $1 }
-   | conditional            { $1 }
-   | bracketexpr            { $1 }
-   | forloop                { $1 }
-   | func                   { $1 }
+    vartype                { $1 }
+  | numericaloperator      { $1 }
+  | conditional            { $1 }
+  | bracketexpr            { $1 }
+  | forloop                { $1 }
+  | func                   { $1 }
 ;
-type:
-  INT { 'INT $1 }
-  | STRING { 'STRING $1 }
-  | BOOL { 'BOOL $1 }
+
+vartype:
+    INT                   { INT $1 }
+  | STRING                { STRING $1 }
+  | BOOL                  { BOOL $1 }
 ;
+
 numericaloperator:
- expr PLUS expr          { $1 + $3 }
-| expr MINUS expr         { $1 - $3 }
-| expr TIMES expr         { $1 * $3 }
-| expr DIV expr           { $1 / $3 }
-| MINUS expr %prec UMINUS { - $2 }
+    expr PLUS expr          { $1 + $3 }
+  | expr MINUS expr         { $1 - $3 }
+  | expr TIMES expr         { $1 * $3 }
+  | expr DIV expr           { $1 / $3 }
+  | MINUS expr %prec UMINUS { - $2 }
 ;
+
 conditional:
-   INT LESSTHAN INT        { ($1 < $3) }
- | INT GREATERTHAN INT     { ($1 > $3) }
- | INT EQUALTO INT         { ($1 = $3) }
+    INT LESSTHAN INT            { ($1 < $3) }
+  | INT GREATERTHAN INT         { ($1 > $3) }
+  | INT EQUALTO INT             { ($1 = $3) }
 ;
+
 bracketexpr:
   LPAREN expr RPAREN       { ( $2 ) }
 ;
 forloop:
-| FOR conditional numericaloperator bracketexpr      { while $2 do $3 $4}
+    FOR conditional numericaloperator bracketexpr      { while $2 do $3 ; $4 done}
+  | IF conditional expr ELSE expr                      { if $2 then $3 else $5 }
 ;
 func:
-  READ INT                   {let read (pos : int) : int list = let infile = open_in Sys.argv.(1) in let columnarr = ref [] in try while (true) do let line = input_line infile in let num = int_of_string (String.make 1 line.[$2*2]) in columnarr := num::!columnarr; done; !columnarr with e -> close_in infile; List.rev !columnarr;;}
-  | WRITE INT                  { let write val = Printf.printf "%d" val;; }
+    READ INT                   { read $2 }
+  | WRITE INT                  { write $2 }
 ;

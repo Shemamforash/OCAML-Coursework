@@ -17,3 +17,5 @@ rule token = parse
     | "read"   { READ }
     | "write"  { WRITE }
     | "for"    { FOR }
+    | "if"     { IF }
+    | "else"   { ELSE }
