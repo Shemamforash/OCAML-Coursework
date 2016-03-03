@@ -61,6 +61,6 @@ forloop:
   | IF conditional expr ELSE expr                      { FuryIf ($2, $3, $5) }
 ;
 func:
-    READ vartype                   { FuryRead $2 }
+    READ                           { FuryRead }
   | WRITE vartype                  { FuryWrite $2 }
 ;

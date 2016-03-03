@@ -1,10 +1,9 @@
-let read (argument : int) : int list =
-  let infile = open_in Sys.argv.(1) in
-  let columnarr = ref [] in try while (true) do
-        let line = input_line infile in
-        let num = int_of_string (String.make 1 line.[argument*2]) in columnarr := num::!columnarr;
-      done; !columnarr
-    with e -> close_in infile;
-      List.rev !columnarr;;
+let write argument = Printf.printf "%d" argument ; Printf.printf "EOL";;
 
-let write argument = Printf.printf "%d" argument;;
+let read : int list =
+  let columnarr = ref [] in
+    try while (true) do
+        let line = input_line stdin in
+        let num = int_of_string (String.make 1 line.[0]) in columnarr := num::!columnarr; write num ;
+      done; !columnarr
+    with e -> List.rev !columnarr;;

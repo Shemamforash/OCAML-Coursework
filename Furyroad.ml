@@ -3,6 +3,7 @@ exception Terminated ;;
 exception UnboundVariableError;;
 exception LookupError;;
 exception StuckTerm;;
+exception NonBaseTypeResult;;
 
 open Functions
 
@@ -24,7 +25,7 @@ type furyterm =
   | FuryIf of furyterm * furyterm * furyterm
 (*  | FuryFor of furyterm * furyterm * furyterm
   | FuryVar of string *)
-  | FuryRead of furyterm
+  | FuryRead
   | FuryWrite of furyterm
 
 type 'a context = Env of (string * 'a) list
@@ -79,9 +80,7 @@ let rec typeOf env e = match e with
 	                )
         |_ -> raise TypeError
     )
-  |FuryRead(e1) -> (match (typeOf env e1) with
-          FINT -> FLIST
-          | _ -> raise TypeError)
+  |FuryRead -> FLIST
   |FuryWrite(n) -> FINT
 
 let bind env name newobject = match env with
@@ -147,8 +146,7 @@ let rec evalnoenv e = match e with
   | (FuryIf(FuryBool(false),e1,e2))   -> e2
   | (FuryIf(b,e1,e2))               -> let b' = (evalnoenv b) in (FuryIf(b',e1,e2))
 
-  | (FuryRead(FuryInt(n))) -> (FuryList(Functions.read n))
-  | (FuryRead(e1)) -> let e1' = (evalnoenv e1) in (FuryRead(e1'))
+  | (FuryRead) -> (FuryList(Functions.read))
 
   | (FuryWrite(FuryInt(n))) -> (Functions.write(n)) ; raise Terminated
   | (FuryWrite(e1)) -> let e1' = (evalnoenv e1) in (FuryWrite(e1'))
@@ -158,3 +156,8 @@ let rec evalnoenv e = match e with
 let rec evalloop e = try ( let e' = evalnoenv e in evalloop e') with Terminated -> if (isValue e) then e else raise StuckTerm ;;
 let evalProg e = evalloop e ;;
 let typeProg e = typeOf (Env []) e ;;
+
+let print_res res = match res with
+    | (FuryInt i) -> print_int i ; print_string " : Int"
+    | (FuryBool b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
+    | _ -> raise NonBaseTypeResult
