@@ -1,6 +1,5 @@
 /* File parser.mly */
 %{
-    open Functions
     open Furyroad
 %}
 
@@ -46,7 +45,7 @@ numericaloperator:
   | expr MINUS expr         { FuryMinus ($1, $3) }
   | expr TIMES expr         { FuryTimes ($1, $3) }
   | expr DIV expr           { FuryDivide ($1, $3) }
-  | MINUS expr %prec UMINUS { -$2 }
+  | MINUS expr %prec UMINUS { FuryNegate ($2) }
 ;
 
 conditional:
@@ -59,10 +58,9 @@ bracketexpr:
   LPAREN expr RPAREN       { ( $2 ) }
 ;
 forloop:
-    FOR conditional numericaloperator bracketexpr      { while $2 do $3 ; $4 done}
-  | IF conditional expr ELSE expr                      { FuryIf ($2, $3, $5 }
+  | IF conditional expr ELSE expr                      { FuryIf ($2, $3, $5) }
 ;
 func:
-    READ vartype                   { read $2 }
-  | WRITE vartype                  { write $2 }
+    READ vartype                   { FuryRead $2 }
+  | WRITE vartype                  { FuryWrite $2 }
 ;

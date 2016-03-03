@@ -7,7 +7,7 @@ open Printf
 
 let parseProgram c =
     try let lexbuf = Lexing.from_channel c in
-            parser_main lexer_main lexbuf
+            main lexer lexbuf
     with Parsing.Parse_error -> failwith "Parse failure!" ;;
 
 
@@ -19,10 +19,5 @@ let parsedProg = parseProgram !arg in
 let () = print_string "Program Parsed" ; print_newline() in
 let _ = typeProg parsedProg in
 let () = print_string "Program Type Checked" ; print_newline() in
-let result1 = evalProgS parsedProg in
-let () = print_string "Program Evaluated using substitution semantics to ==> " ; print_res result1 ; print_newline() in
-let result2 = evalProg parsedProg in
-let () = print_string "Program Evaluated using machine semantics to  ==> " ;  print_res result2 ; print_newline() in
-let result3 = bigEval parsedProg in
-let () = print_string "Program Evaluated using big step semantics to ==> " ;  print_res result3 ; print_newline() in
+let result1 = evalProg parsedProg in
 flush stdout

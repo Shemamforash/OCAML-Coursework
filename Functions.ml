@@ -8,5 +8,3 @@ let read (argument : int) : int list =
       List.rev !columnarr;;
 
 let write argument = Printf.printf "%d" argument;;
-
-let FuryPlus (a1, a2) = match e1 e2
