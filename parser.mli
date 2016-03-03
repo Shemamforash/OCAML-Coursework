@@ -2,7 +2,7 @@ type token =
   | INT of (int)
   | STRING of (string)
   | BOOL of (bool)
-  | LIST of (list)
+  | LIST of (int list)
   | PLUS
   | MINUS
   | TIMES
@@ -20,4 +20,4 @@ type token =
   | ELSE
 
 val main :
-  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> int
+  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Furyroad.furyterm

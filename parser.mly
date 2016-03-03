@@ -7,7 +7,7 @@
 %token <int> INT
 %token <string> STRING
 %token <bool> BOOL
-%token <list> LIST
+%token <int list> LIST
 %token PLUS MINUS TIMES DIV
 %token LESSTHAN EQUALTO GREATERTHAN
 %token LPAREN RPAREN
@@ -18,7 +18,7 @@
 %nonassoc LESSTHAN EQUALTO GREATERTHAN
 %nonassoc UMINUS IF ELSE FOR READ WRITE    /* highest precedence */
 %start main             /* the entry point */
-%type <int> main
+%type <Furyroad.furyterm> main
 %%
 
 main:
@@ -35,23 +35,24 @@ expr:
 ;
 
 vartype:
-    INT                   { INT $1 }
-  | STRING                { STRING $1 }
-  | BOOL                  { BOOL $1 }
+    INT                   { FuryInt $1 }
+  | STRING                { FuryString $1 }
+  | BOOL                  { FuryBool $1 }
+  | LIST                  { FuryList $1 }
 ;
 
 numericaloperator:
-    expr PLUS expr          { $1 + $3 }
-  | expr MINUS expr         { $1 - $3 }
-  | expr TIMES expr         { $1 * $3 }
-  | expr DIV expr           { $1 / $3 }
-  | MINUS expr %prec UMINUS { - $2 }
+    expr PLUS expr          { FuryPlus ($1, $3) }
+  | expr MINUS expr         { FuryMinus ($1, $3) }
+  | expr TIMES expr         { FuryTimes ($1, $3) }
+  | expr DIV expr           { FuryDivide ($1, $3) }
+  | MINUS expr %prec UMINUS { -$2 }
 ;
 
 conditional:
-    INT LESSTHAN INT            { ($1 < $3) }
-  | INT GREATERTHAN INT         { ($1 > $3) }
-  | INT EQUALTO INT             { ($1 = $3) }
+    vartype LESSTHAN vartype            { FuryEqualTo($1, $3) }
+  | vartype GREATERTHAN vartype         { FuryMoreThan($1, $3) }
+  | vartype EQUALTO vartype             { FuryEqualTo($1, $3) }
 ;
 
 bracketexpr:
@@ -59,9 +60,9 @@ bracketexpr:
 ;
 forloop:
     FOR conditional numericaloperator bracketexpr      { while $2 do $3 ; $4 done}
-  | IF conditional expr ELSE expr                      { if $2 then $3 else $5 }
+  | IF conditional expr ELSE expr                      { FuryIf ($2, $3, $5 }
 ;
 func:
-    READ INT                   { read $2 }
-  | WRITE INT                  { write $2 }
+    READ vartype                   { read $2 }
+  | WRITE vartype                  { write $2 }
 ;

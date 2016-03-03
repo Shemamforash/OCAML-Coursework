@@ -1,7 +1,7 @@
 PP = str.cma
 SOURCES = \
   Functions.ml \
-  Furyroad.mli \
+  Furyroad.ml \
   parser.mli parser.mly lexer.mll \
   main.ml
 RESULT = result.exe
