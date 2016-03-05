@@ -13,9 +13,11 @@ rule lexer = parse
     | '/'      { DIV }
     | '('      { LPAREN }
     | ')'      { RPAREN }
+    | '='      { EQUALS }
     | eof      { raise Eof }
     | "read"   { READ }
     | "write"  { WRITE }
     | "for"    { FOR }
     | "if"     { IF }
     | "else"   { ELSE }
+    | ['a'-'z''A'-'Z']+ as lxm { VARIABLE }

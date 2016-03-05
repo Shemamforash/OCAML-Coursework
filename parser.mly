@@ -4,10 +4,11 @@
 %}
 
 %token <int> INT
-%token <string> STRING
+%token <string> VARIABLE
 %token <bool> BOOL
 %token <int list> LIST
-%token PLUS MINUS TIMES DIV
+%token <FuryRoad.furytype> TYPE
+%token PLUS MINUS TIMES DIV EQUALS
 %token LESSTHAN EQUALTO GREATERTHAN
 %token LPAREN RPAREN
 %token EOL
@@ -35,9 +36,12 @@ expr:
 
 vartype:
     INT                   { FuryInt $1 }
-  | STRING                { FuryString $1 }
   | BOOL                  { FuryBool $1 }
   | LIST                  { FuryList $1 }
+;
+
+declaration:
+  TYPE VARIABLE EQUALS vartype       { FuryDeclare($1, FuryString $2, $4)}
 ;
 
 numericaloperator:
