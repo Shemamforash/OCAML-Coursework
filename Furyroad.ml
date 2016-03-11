@@ -4,6 +4,7 @@ exception UnboundVariableError;;
 exception LookupError;;
 exception StuckTerm;;
 exception NonBaseTypeResult;;
+exception RootEnvironmentLeft;;
 
 open Functions
 
@@ -29,19 +30,30 @@ type furyterm =
   | FuryWrite of furyterm
   | FuryDeclare of furyterm * furyterm * furyterm
 
-type 'a context = Env of (furytype * 'a) list
-type typeContext = furytype context
-type valContext = furyterm context
+type environment =
+  | Environment of environment * ((furyterm * furyterm) Hashtbl.t)
+  | NullEnvironment
+
+let rec find l name = match l with
+  | [] -> raise Not_found
+  | (n, obj) :: tl -> if(n = name) then (n, obj) else find tl n
+
+let rec lookup objectname environment = match environment with
+    | NullEnvironment -> raise RootEnvironmentLeft
+    | Environment(parent, lst) -> (try (environment, Hashtbl.find lst objectname) with Not_found -> lookup objectname parent)
 
 let bind env name newobject = match env with
-      Env(tail) ->  Env( (name, newobject) :: tail ) ;;
+    | Environment(_, lst) ->  Hashtbl.replace lst name newobject
+    | NullEnvironment -> raise RootEnvironmentLeft
+
+let rebind env name newobject = let oldval = lookup env name in match oldval with (e, (_, _)) -> (bind e name newobject)
 
 let rec typeOf env e = match e with
    FuryInt (n) -> FINT
   |FuryBool (b) -> FBOOL
   |FuryList (l) -> FLIST
   |FuryString (s) -> FSTRING
-  (*|FuryVar (x) ->  (try (lookupobject x env) with LookupError -> raise TypeError)*)
+  |FuryVar (x) ->  let l = (try (lookup x env) with RootEnvironmentLeft -> raise TypeError) in match l with (_, (_, o)) -> typeOf env o
   |FuryLessThan (e1,e2) ->
       ( match (typeOf env e1) , (typeOf env e2) with
           FINT, FINT -> FBOOL
@@ -86,16 +98,6 @@ let rec typeOf env e = match e with
   |FuryRead -> FLIST
   |FuryWrite(n) -> FINT
   |FuryDeclare(t, n, v) -> FURYVOID (*type name value*)
-
-(*let rec lookupobject objectname evnironment = match environment with
-    [] -> raise LookupError
-  | ((binding,existingobject) :: gs) ->
-        (
-          match (binding = objectname) with
-            true -> existingobject
-           |false -> lookupobject ( (gs)) objectname
-	)
-;;*)
 
 (*if e is a value eg. an int, bool, string, or list then return true since we don't need to evaluate it*)
 let rec isValue e = match e with
@@ -153,7 +155,7 @@ let rec evalnoenv env e = match e with
   | (FuryWrite(FuryInt(n))) -> (Functions.write(n)) ; raise Terminated
   | (FuryWrite(e1)) -> let e1' = (evalnoenv env e1) in (FuryWrite(e1'))
 
-  | (FuryDeclare(t, FuryString(name), value)) -> let expr_type = typeOf value env in declare env name t value
+  | (FuryDeclare(t, FuryString(name), value)) -> let expr_type = typeOf value env in bind env name value
 
   | _ -> raise Terminated ;;
 
