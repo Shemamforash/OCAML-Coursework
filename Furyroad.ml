@@ -6,37 +6,8 @@ exception StuckTerm;;
 exception NonBaseTypeResult;;
 exception RootEnvironmentLeft;;
 
-open Functions
-
-type furytype = FINT | FLIST | FBOOL | FSTRING | FURYVOID
-
-type furyterm =
-    FuryInt of int
-  | FuryBool of bool
-  | FuryList of int list
-  | FuryString of string
-  | FuryLessThan of furyterm * furyterm
-  | FuryMoreThan of furyterm * furyterm
-  | FuryEqualTo of furyterm * furyterm
-  | FuryPlus of furyterm * furyterm
-  | FuryMinus of furyterm * furyterm
-  | FuryDivide of furyterm * furyterm
-  | FuryTimes of furyterm * furyterm
-  | FuryNegate of furyterm
-  | FuryIf of furyterm * furyterm * furyterm
-(*  | FuryFor of furyterm * furyterm * furyterm
-  | FuryVar of string *)
-  | FuryRead
-  | FuryWrite of furyterm
-  | FuryDeclare of furyterm * furyterm * furyterm
-
-type environment =
-  | Environment of environment * ((furyterm * furyterm) Hashtbl.t)
-  | NullEnvironment
-
-let rec find l name = match l with
-  | [] -> raise Not_found
-  | (n, obj) :: tl -> if(n = name) then (n, obj) else find tl n
+open Functions;;
+open Types;;
 
 let rec lookup objectname environment = match environment with
     | NullEnvironment -> raise RootEnvironmentLeft
@@ -46,14 +17,18 @@ let bind env name newobject = match env with
     | Environment(_, lst) ->  Hashtbl.replace lst name newobject
     | NullEnvironment -> raise RootEnvironmentLeft
 
-let rebind env name newobject = let oldval = lookup env name in match oldval with (e, (_, _)) -> (bind e name newobject)
-
 let rec typeOf env e = match e with
    FuryInt (n) -> FINT
   |FuryBool (b) -> FBOOL
   |FuryList (l) -> FLIST
   |FuryString (s) -> FSTRING
-  |FuryVar (x) ->  let l = (try (lookup x env) with RootEnvironmentLeft -> raise TypeError) in match l with (_, (_, o)) -> typeOf env o
+  |FuryVar (x) ->  let (l, o) = (try (lookup x env) with RootEnvironmentLeft -> raise Not_found) in
+      ( match (typeOf env o) with
+        | FINT -> FINT
+        | FBOOL -> FBOOL
+        | FLIST -> FLIST
+        | FSTRING -> FSTRING
+        | _ -> raise TypeError)
   |FuryLessThan (e1,e2) ->
       ( match (typeOf env e1) , (typeOf env e2) with
           FINT, FINT -> FBOOL
@@ -97,7 +72,8 @@ let rec typeOf env e = match e with
     )
   |FuryRead -> FLIST
   |FuryWrite(n) -> FINT
-  |FuryDeclare(t, n, v) -> FURYVOID (*type name value*)
+  |FuryDeclare(t, n, v) -> FVOID (*type name value*)
+  |FuryVoid(u) -> FVOID
 
 (*if e is a value eg. an int, bool, string, or list then return true since we don't need to evaluate it*)
 let rec isValue e = match e with
@@ -108,62 +84,58 @@ let rec isValue e = match e with
   | _ -> false
 ;;
 
-let rec evalnoenv env e = match e with
-(* | (FuryVar x) -> (try (lookupobject x) with LookupError -> raise UnboundVariableError) *)
-  | (FuryInt n) -> raise Terminated
-  | (FuryBool b) -> raise Terminated
-  | (FuryString s) -> raise Terminated
-  | (FuryList l) -> raise Terminated
+let rec evaluate (env:environment) e = match e with
+  | (FuryVar x) -> let (n, v) = (try (lookup x env) with LookupError -> raise UnboundVariableError) in v
+  | (FuryInt n) -> FuryInt(n)
+  | (FuryBool b) -> FuryBool(b)
+  | (FuryString s) -> FuryString(s)
+  | (FuryList l) -> FuryList(l)
+  | (FuryVoid v) -> FuryVoid(v)
 
-  | (FuryNegate (FuryInt(n))) -> (FuryInt (-n))
-  | (FuryNegate (e1)) -> let e1' = (evalnoenv env e1) in (FuryNegate(e1'))
+  | (FuryNegate (FuryInt(n))) -> FuryInt (-n)
+  | (FuryNegate (e1)) -> let e1' = (evaluate env e1) in FuryNegate(e1')
 
-  | (FuryLessThan(FuryInt(n),FuryInt(m))) -> (FuryBool( n < m ))
-  | (FuryLessThan(FuryInt(n), e2))      -> let e2' = (evalnoenv env e2) in (FuryLessThan(FuryInt(n),e2'))
-  | (FuryLessThan(e1, e2))            -> let e1' = (evalnoenv env e1) in (FuryLessThan(e1',e2))
+  | (FuryLessThan(FuryInt(n),FuryInt(m))) -> FuryBool( n < m )
+  | (FuryLessThan(FuryInt(n), e2))      -> let e2' = (evaluate env e2) in FuryLessThan(FuryInt(n),e2')
+  | (FuryLessThan(e1, e2))            -> let e1' = (evaluate env e1) in FuryLessThan(e1',e2)
 
-  | (FuryMoreThan(FuryInt(n),FuryInt(m))) -> (FuryBool( n > m ))
-  | (FuryMoreThan(FuryInt(n), e2))      -> let e2' = (evalnoenv env e2) in (FuryMoreThan(FuryInt(n),e2'))
-  | (FuryMoreThan(e1, e2))            -> let e1' = (evalnoenv env e1) in (FuryMoreThan(e1',e2))
+  | (FuryMoreThan(FuryInt(n),FuryInt(m))) -> FuryBool( n > m )
+  | (FuryMoreThan(FuryInt(n), e2))      -> let e2' = (evaluate env e2) in FuryMoreThan(FuryInt(n),e2')
+  | (FuryMoreThan(e1, e2))            -> let e1' = (evaluate env e1) in FuryMoreThan(e1',e2)
 
-  | (FuryEqualTo(FuryInt(n),FuryInt(m))) -> (FuryBool( n = m ))
-  | (FuryEqualTo(FuryInt(n), e2))      -> let e2' = (evalnoenv env e2) in (FuryEqualTo(FuryInt(n),e2'))
-  | (FuryEqualTo(e1, e2))            -> let e1' = (evalnoenv env e1) in (FuryEqualTo(e1',e2))
+  | (FuryEqualTo(FuryInt(n),FuryInt(m))) -> FuryBool( n = m )
+  | (FuryEqualTo(FuryInt(n), e2))      -> let e2' = (evaluate env e2) in FuryEqualTo(FuryInt(n),e2')
+  | (FuryEqualTo(e1, e2))            -> let e1' = (evaluate env e1) in FuryEqualTo(e1',e2)
 
-  | (FuryPlus(FuryInt(n),FuryInt(m))) -> (FuryInt( n + m ))
-  | (FuryPlus(FuryInt(n), e2))      -> let e2' = (evalnoenv env e2) in (FuryPlus(FuryInt(n),e2'))
-  | (FuryPlus(e1, e2))            -> let e1' = (evalnoenv env e1) in (FuryPlus(e1', e2))
+  | (FuryPlus(FuryInt(n),FuryInt(m))) -> FuryInt( n + m )
+  | (FuryPlus(FuryInt(n), e2))      -> let e2' = (evaluate env e2) in FuryPlus(FuryInt(n),e2')
+  | (FuryPlus(e1, e2))            -> let e1' = (evaluate env e1) in FuryPlus(e1', e2)
 
-  | (FuryMinus(FuryInt(n),FuryInt(m))) -> (FuryInt( n - m ))
-  | (FuryMinus(FuryInt(n), e2))      -> let e2' = (evalnoenv env e2) in (FuryMinus(FuryInt(n),e2'))
-  | (FuryMinus(e1, e2))            -> let e1' = (evalnoenv env  e1) in (FuryMinus(e1', e2))
+  | (FuryMinus(FuryInt(n),FuryInt(m))) -> FuryInt( n - m )
+  | (FuryMinus(FuryInt(n), e2))      -> let e2' = (evaluate env e2) in FuryMinus(FuryInt(n),e2')
+  | (FuryMinus(e1, e2))            -> let e1' = (evaluate env  e1) in FuryMinus(e1', e2)
 
-  | (FuryDivide(FuryInt(n),FuryInt(m))) -> (FuryInt( n / m ))
-  | (FuryDivide(FuryInt(n), e2))      -> let e2' = (evalnoenv env e2) in (FuryDivide(FuryInt(n),e2'))
-  | (FuryDivide(e1, e2))            -> let e1' = (evalnoenv env e1) in (FuryDivide(e1', e2))
+  | (FuryDivide(FuryInt(n),FuryInt(m))) -> FuryInt( n / m )
+  | (FuryDivide(FuryInt(n), e2))      -> let e2' = (evaluate env e2) in FuryDivide(FuryInt(n),e2')
+  | (FuryDivide(e1, e2))            -> let e1' = (evaluate env e1) in FuryDivide(e1', e2)
 
-  | (FuryTimes(FuryInt(n),FuryInt(m))) -> (FuryInt( n * m ))
-  | (FuryTimes(FuryInt(n), e2))      -> let e2' = (evalnoenv env e2) in (FuryTimes(FuryInt(n),e2'))
-  | (FuryTimes(e1, e2))            -> let e1' = (evalnoenv env e1) in (FuryTimes(e1', e2))
+  | (FuryTimes(FuryInt(n),FuryInt(m))) -> FuryInt( n * m )
+  | (FuryTimes(FuryInt(n), e2))      -> let e2' = (evaluate env e2) in FuryTimes(FuryInt(n),e2')
+  | (FuryTimes(e1, e2))            -> let e1' = (evaluate env e1) in FuryTimes(e1', e2)
 
   | (FuryIf(FuryBool(true),e1,e2))    -> e1
   | (FuryIf(FuryBool(false),e1,e2))   -> e2
-  | (FuryIf(b,e1,e2))               -> let b' = (evalnoenv env b) in (FuryIf(b',e1,e2))
+  | (FuryIf(b,e1,e2))               -> let b' = (evaluate env b) in FuryIf(b',e1,e2)
 
   | (FuryRead) -> (FuryList(Functions.read))
 
-  | (FuryWrite(FuryInt(n))) -> (Functions.write(n)) ; raise Terminated
-  | (FuryWrite(e1)) -> let e1' = (evalnoenv env e1) in (FuryWrite(e1'))
+  | (FuryWrite(FuryInt(n))) -> Functions.write(n) ; raise Terminated
+  | (FuryWrite(e1)) -> let e1' = (evaluate env e1) in FuryWrite(e1')
 
-  | (FuryDeclare(t, FuryString(name), value)) -> let expr_type = typeOf value env in bind env name value
+  | (FuryDeclare(t, FuryString(name), value)) -> FuryVoid(bind env name value);
 
   | _ -> raise Terminated ;;
 
-let rec evalloop e = try ( let e' = evalnoenv env e in evalloop e') with Terminated -> if (isValue e) then e else raise StuckTerm ;;
-let evalProg e = evalloop e ;;
-let typeProg e = typeOf (Env []) e ;;
-
-let print_res res = match res with
-    | (FuryInt i) -> print_int i ; print_string " : Int"
-    | (FuryBool b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
-    | _ -> raise NonBaseTypeResult
+(* let rec evalloop env e = try (let (e',env') = (evaluate env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise StuckTerm  ;;
+let evalProg e = evalloop (Env []) e ;;
+let typeProg e = typeOf (Env []) e ;; *)

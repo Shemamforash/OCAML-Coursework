@@ -1,23 +1,25 @@
 open Furyroad
 open Functions
+open Types
 open Lexer
 open Parser
-open Arg
 open Printf
 
-let parseProgram c =
-    try let lexbuf = Lexing.from_channel c in
-            main lexer lexbuf
-    with Parsing.Parse_error -> failwith "Parse failure!" ;;
+let program_file = open_in Sys.argv.(1);;
+let voidEnv = NullEnvironment;;
+let root = Environment (voidEnv, Hashtbl.create(5));;
 
-
-let arg = ref stdin in
-let setProg p = arg := open_in p in
-let usage = "./main PROGRAM_FILE" in
-parse [] setProg usage ;
-let parsedProg = parseProgram !arg in
-let () = print_string "Program Parsed" ; print_newline() in
-let _ = typeProg parsedProg in
-let () = print_string "Program Type Checked" ; print_newline() in
-let result1 = evalProg parsedProg in print_res result1 ; print_newline() ;
-flush stdout
+let arg =
+  try (
+    let lexbuf = Lexing.from_channel program_file
+    in while true do
+      try
+        let result = main lexer lexbuf
+        in match result with
+        | FuryTerm e -> let evaluated = (evaluate root e) in print_res evaluated
+        | Nothing -> ()
+      with
+      | Parsing.Parse_error -> failwith "Parse failure!"
+    done
+  ) with
+  | Lexer.Eof ->  flush stdout ; exit 0;

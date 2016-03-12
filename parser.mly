@@ -1,13 +1,14 @@
 /* File parser.mly */
 %{
     open Furyroad
+    open Types
 %}
 
 %token <int> INT
 %token <string> VARIABLE
 %token <bool> BOOL
 %token <int list> LIST
-%token <FuryRoad.furytype> TYPE
+%token <Types.furytype> TYPE
 %token PLUS MINUS TIMES DIV EQUALS
 %token LESSTHAN EQUALTO GREATERTHAN
 %token LPAREN RPAREN
@@ -18,11 +19,12 @@
 %nonassoc LESSTHAN EQUALTO GREATERTHAN
 %nonassoc UMINUS IF ELSE FOR READ WRITE    /* highest precedence */
 %start main             /* the entry point */
-%type <Furyroad.furyterm> main
+%type <Types.out> main
 %%
 
 main:
-    expr EOL                { $1 }
+    | EOL                     { Nothing }
+    | expr EOL                { FuryTerm $1 }
 ;
 
 expr:
@@ -32,6 +34,7 @@ expr:
   | bracketexpr            { $1 }
   | forloop                { $1 }
   | func                   { $1 }
+  | declaration            { $1 }
 ;
 
 vartype:
@@ -41,7 +44,7 @@ vartype:
 ;
 
 declaration:
-  TYPE VARIABLE EQUALS vartype       { FuryDeclare($1, FuryString $2, $4)}
+  TYPE VARIABLE EQUALS vartype       { FuryDeclare($1, FuryString($2), $4)}
 ;
 
 numericaloperator:

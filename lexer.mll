@@ -1,6 +1,7 @@
 (* File lexer.mll *)
 {
 open Parser        (* The type token is defined in parser.mli *)
+open Types
 exception Eof
 }
 rule lexer = parse
@@ -20,4 +21,5 @@ rule lexer = parse
     | "for"    { FOR }
     | "if"     { IF }
     | "else"   { ELSE }
-    | ['a'-'z''A'-'Z']+ as lxm { VARIABLE }
+    | "int"  | "float" | "bool" as lxm      { TYPE(stringtotype lxm) }
+    | ['a'-'z''A'-'Z']+ as lxm { VARIABLE(lxm) }
