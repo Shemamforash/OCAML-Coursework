@@ -13,7 +13,7 @@
 %token LESSTHAN EQUALTO GREATERTHAN
 %token LPAREN RPAREN
 %token EOL
-%token FOR READ WRITE IF ELSE
+%token FORINIT FORCOND FORBODY READ WRITE IF ELSE
 %left PLUS MINUS        /* lowest precedence */
 %left TIMES DIV         /* medium precedence */
 %nonassoc LESSTHAN EQUALTO GREATERTHAN
@@ -37,14 +37,23 @@ expr:
   | declaration            { $1 }
 ;
 
+sequence:
+  | expr EOL sequence        { $1 :: $3 }
+  | EOL sequence             { $2 }
+  | expr                     { [$1] }
+  |                          { [] }
+;
+
 vartype:
     INT                   { FuryInt $1 }
   | BOOL                  { FuryBool $1 }
   | LIST                  { FuryList $1 }
+  | VARIABLE              { FuryVar $1 }
 ;
 
 declaration:
-  TYPE VARIABLE EQUALS vartype       { FuryDeclare($1, FuryString($2), $4)}
+  | TYPE VARIABLE EQUALS expr       { FuryDeclare($1, FuryString($2), $4)}
+  | VARIABLE EQUALS expr            { FuryRebind(FuryString($1), $3) }
 ;
 
 numericaloperator:
@@ -52,7 +61,7 @@ numericaloperator:
   | expr MINUS expr         { FuryMinus ($1, $3) }
   | expr TIMES expr         { FuryTimes ($1, $3) }
   | expr DIV expr           { FuryDivide ($1, $3) }
-  | MINUS expr %prec UMINUS { FuryNegate ($2) }
+  | MINUS expr %prec UMINUS { FuryNegate $2 }
 ;
 
 conditional:
@@ -65,7 +74,8 @@ bracketexpr:
   LPAREN expr RPAREN       { ( $2 ) }
 ;
 forloop:
-  | IF conditional expr ELSE expr                      { FuryIf ($2, $3, $5) }
+  | IF conditional sequence ELSE sequence                      { FuryIf ($2, $3, $5) }
+  | FORINIT declaration FORCOND conditional FORBODY sequence                       { FuryFor ($2, $4, $6)}
 ;
 func:
     READ                           { FuryRead }

@@ -18,7 +18,9 @@ rule lexer = parse
     | eof      { raise Eof }
     | "read"   { READ }
     | "write"  { WRITE }
-    | "for"    { FOR }
+    | "ilive" { FORINIT }
+    | "idie"  { FORCOND }
+    | "iliveagain" { FORBODY }
     | "if"     { IF }
     | "else"   { ELSE }
     | "int"  | "float" | "bool" as lxm      { TYPE(stringtotype lxm) }
