@@ -1,12 +1,20 @@
 exception NonBaseTypeResult;;
 
-type furytype = FINT | FLIST | FBOOL | FSTRING | FVOID
+type furytype = FINT | FLIST | FBOOL | FSTRING | FVOID | FFLOAT
 
-type furyterm =
-    FuryInt of int
+type out = Nothing | FuryTerm of furyterm
+
+and furyprimitive =
+  | FuryInt of int
   | FuryBool of bool
   | FuryList of int list
   | FuryString of string
+  | FuryFloat of float
+  | FuryVoid of furyterm
+  | FuryNull
+
+and furyterm =
+  | FuryPrimitive of furyprimitive
   | FuryLessThan of furyterm * furyterm
   | FuryMoreThan of furyterm * furyterm
   | FuryEqualTo of furyterm * furyterm
@@ -19,13 +27,10 @@ type furyterm =
 (*  | FuryFor of furyterm * furyterm * furyterm  *)
   | FuryVar of string
   | FuryRead
-  | FuryWrite of furyterm
+  | FuryWrite of furyprimitive
   | FuryDeclare of furytype * furyterm * furyterm
   | FuryRebind of string * furyterm
-  | FuryVoid of unit
   | FuryFor of furyterm * furyterm * (furyterm list)
-
-type out = Nothing | FuryTerm of furyterm
 
 type environment =
   | Environment of environment * ((string, furyterm) Hashtbl.t)
@@ -35,6 +40,7 @@ let stringtotype = function
   | "bool" -> FBOOL
   | "int" -> FINT
   | "list" -> FLIST
+  | "float" -> FFLOAT
   | _ -> failwith "Not a type";;
 
 let typetostring = function
@@ -43,19 +49,25 @@ let typetostring = function
   | FSTRING -> "string"
   | FVOID -> "void"
   | FLIST -> "list"
+  | FFLOAT -> "float"
 
 let rec listtostring = function
   | [] -> ""
   | hd :: [] -> string_of_int hd ^ ", "
   | hd :: tl -> string_of_int hd ^ ", " ^ listtostring tl
 
-let rec print_res res = match res with
+let print_primitive p = match p with
   | (FuryInt i) -> print_int i
   | (FuryBool b) -> print_string (if b then "true" else "false")
-  | (FuryVar x) -> print_string (x ^ " x = ")
   | (FuryString s) -> print_string s
   | (FuryList l) ->  print_string (listtostring l ^ " : List")
   | (FuryVoid v) -> print_string "Void"
+  | (FuryFloat f) -> print_float f
+  | (FuryNull) -> print_string "Null"
+
+let rec print_res res = match res with
+  | (FuryPrimitive p) -> print_primitive p
+  | (FuryVar x) -> print_string (x ^ " x = ")
   | (FuryNegate e) -> print_string "-" ; print_res e
   | (FuryLessThan(e1, e2)) -> print_res e1 ; print_string " < " ; print_res e2
   | (FuryMoreThan(e1, e2)) -> print_res e1 ; print_string " > " ; print_res e2

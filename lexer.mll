@@ -18,6 +18,7 @@ rule lexer = parse
     | "=="     { EQUALTO }
     | '<'      { LESSTHAN }
     | '>'      { GREATERTHAN }
+    | ';'      { BREAK }
     | eof      { raise Eof }
     | "read"   { READ }
     | "write"  { WRITE }
@@ -25,6 +26,7 @@ rule lexer = parse
     | "idie"  { FORCOND }
     | "iliveagain" { FORBODY }
     | "if"     { IF }
+    | "then"   { THEN }
     | "else"   { ELSE }
     | "int"  | "float" | "bool" as lxm      { TYPE(stringtotype lxm) }
     | ['a'-'z''A'-'Z']+ as lxm { VARIABLE(lxm) }

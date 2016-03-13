@@ -2,6 +2,7 @@ PP = str.cma
 DEPEND += Lexer.mll Parser.mly
 SOURCES = \
 	Types.ml \
+	EvaluationFunctions.ml \
   Functions.ml \
   Furyroad.ml \
   Parser.mli Parser.mly Lexer.mll \
