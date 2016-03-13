@@ -1,3 +1,2 @@
-int x = 0
-x = x + 1
-x
+ilive (int x = 0) idie (x == 10) iliveagain (x = x + 1
+x)

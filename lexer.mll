@@ -15,6 +15,9 @@ rule lexer = parse
     | '('      { LPAREN }
     | ')'      { RPAREN }
     | '='      { EQUALS }
+    | "=="     { EQUALTO }
+    | '<'      { LESSTHAN }
+    | '>'      { GREATERTHAN }
     | eof      { raise Eof }
     | "read"   { READ }
     | "write"  { WRITE }

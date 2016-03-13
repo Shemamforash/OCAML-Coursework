@@ -68,6 +68,7 @@ let rec typeOf env e = match e with
   |FuryRead -> FLIST
   |FuryWrite(n) -> FINT
   |FuryDeclare(t, n, v) -> let ty = typeOf env v in (match (t=ty) with true -> FVOID | false -> raise TypeError) (*type name value*)
+  |FuryRebind(n, v) -> let (e2, v2) = (lookup n env) in (match ((typeOf env v)=(typeOf e2 v2)) with true -> FVOID | false -> raise TypeError)
   |FuryVoid(u) -> FVOID
 
 (*if e is a value eg. an int, bool, string, or list then return true since we don't need to evaluate it*)
@@ -79,8 +80,14 @@ let rec isValue e = match e with
   | _ -> false
 ;;
 
+let prin n v = print_string n;;
+let rec printEnv e = match e with
+  | Environment (p, h) -> Hashtbl.iter prin h ; printEnv p
+  | NullEnvironment -> print_string ""
+
+
 let rec evaluate (env:environment) e = match e with
-  | (FuryVar x) -> let (n, v) = (try (lookup x env) with LookupError -> raise UnboundVariableError) in v
+  | (FuryVar x) -> let (n, v) = (try (lookup x env) with LookupError -> raise UnboundVariableError) in (evaluate env v)
   | (FuryInt n) -> FuryInt(n)
   | (FuryBool b) -> FuryBool(b)
   | (FuryString s) -> FuryString(s)
@@ -126,9 +133,8 @@ let rec evaluate (env:environment) e = match e with
 
   | (FuryFor(e1, e2, e3)) -> let newenv = Environment (env, (Hashtbl.create(5))) in
                                   let v = (evaluate newenv e1) in
-                                  print_string "potato" ;
-                                  if (typeOf newenv e2)=FBOOL then (
-                                      while (typeOf newenv (evaluate newenv e2))=FBOOL do
+                                  if (typeOf newenv (evaluate newenv e2))=FBOOL then (
+                                      while not (let b = (evaluate newenv (evaluate newenv e2)) in match b with FuryBool b -> b | _ -> raise TypeError) do
                                          let env3 = Environment(newenv, (Hashtbl.create(5))) in evaluateSequence env3 e3
                                       done ; FuryVoid() )
                                   else raise TypeMismatch
@@ -138,9 +144,9 @@ let rec evaluate (env:environment) e = match e with
   | (FuryWrite(FuryInt(n))) -> Functions.write(n) ; raise Terminated
   | (FuryWrite(e1)) -> let e1' = (evaluate env e1) in FuryWrite(e1')
 
-  | (FuryDeclare(t, FuryString(name), value)) -> if ((typeOf env e)=FVOID) then FuryVoid(bind env name value) else raise TypeMismatch
+  | (FuryDeclare(t, FuryString(name), value)) -> if ((typeOf env e)=FVOID) then FuryVoid(bind env name (evaluate env value)) else raise TypeMismatch
 
-  | (FuryRebind(FuryVar(name), value)) -> if ((typeOf env e)=FVOID) then FuryVoid(bind env name value) else raise TypeMismatch
+  | (FuryRebind(name, value)) -> if ((typeOf env e)=FVOID) then FuryVoid(assign env name value) else raise TypeMismatch
 
   | _ -> raise Terminated
 
@@ -148,6 +154,14 @@ and evaluateSequence env seq = match seq with
   | (e1 :: [])          -> evaluate env e1
   | (e1 :: e2)          -> evaluate env e1 ; evaluateSequence env e2
   | ([])                -> FuryVoid()
+
+and assign env name expr =
+    try (
+      let (env2, var) = lookup name env in
+        let vartyp = typeOf env var in
+          let vartyp2 = typeOf env expr in
+            if vartyp=vartyp2 then bind env2 name (evaluate env expr) else raise TypeMismatch
+      ) with Not_found -> raise Not_found
 
 (* let rec evalloop env e = try (let (e',env') = (evaluate env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise StuckTerm  ;;
 let evalProg e = evalloop (Env []) e ;;

@@ -21,7 +21,7 @@ type furyterm =
   | FuryRead
   | FuryWrite of furyterm
   | FuryDeclare of furytype * furyterm * furyterm
-  | FuryRebind of furyterm * furyterm
+  | FuryRebind of string * furyterm
   | FuryVoid of unit
   | FuryFor of furyterm * furyterm * (furyterm list)
 
@@ -50,10 +50,10 @@ let rec listtostring = function
   | hd :: tl -> string_of_int hd ^ ", " ^ listtostring tl
 
 let rec print_res res = match res with
-  | (FuryInt i) -> print_int i ; print_string " : Int"
-  | (FuryBool b) -> print_string (if b then "true" else "false") ; print_string " : Bool"
-  | (FuryVar x) -> print_string (x ^ " : Variable")
-  | (FuryString s) -> print_string (s ^ " : String")
+  | (FuryInt i) -> print_int i
+  | (FuryBool b) -> print_string (if b then "true" else "false")
+  | (FuryVar x) -> print_string (x ^ " x = ")
+  | (FuryString s) -> print_string s
   | (FuryList l) ->  print_string (listtostring l ^ " : List")
   | (FuryVoid v) -> print_string "Void"
   | (FuryNegate e) -> print_string "-" ; print_res e
@@ -69,7 +69,7 @@ let rec print_res res = match res with
   | (FuryRead) -> print_string "reading stream"
   | (FuryWrite(FuryInt(n))) -> print_string "writing out"
   | (FuryDeclare(e1, e2, e3)) -> print_res e2 ; print_string " = " ; print_res e3
-  | (FuryRebind(e1, e2)) -> print_res e1 ; print_string " = " ; print_res e1
+  | (FuryRebind(e1, e2)) -> print_string (e1 ^ " = ") ; print_res e2
   | _ -> raise NonBaseTypeResult
 
 and exprlisttostring = function
