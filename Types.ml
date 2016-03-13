@@ -33,7 +33,7 @@ and furyterm =
   | FuryFor of furyterm * furyterm * (furyterm list)
 
 type environment =
-  | Environment of environment * ((string, furyterm) Hashtbl.t)
+  | Environment of environment * ((string, furyprimitive) Hashtbl.t)
   | NullEnvironment
 
 let stringtotype = function

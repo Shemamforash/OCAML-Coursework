@@ -6,3 +6,9 @@
 (2 * 3)
 (2 / 3)
 if (3 < 4) then (3 + 4) else (7 + 3)
+int y = 4;
+y
+y = y + 2;
+y
+ilive(y = 6;)idie(y < 10)iliveagain(y = y + 1;)
+y
