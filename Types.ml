@@ -27,7 +27,7 @@ and furyterm =
 (*  | FuryFor of furyterm * furyterm * furyterm  *)
   | FuryVar of string
   | FuryRead
-  | FuryWrite of furyprimitive
+  | FuryWrite of furyterm
   | FuryDeclare of furytype * furyterm * furyterm
   | FuryRebind of string * furyterm
   | FuryFor of furyterm * furyterm * (furyterm list)
@@ -37,9 +37,9 @@ type environment =
   | NullEnvironment
 
 let stringtotype = function
-  | "bool" -> FBOOL
-  | "int" -> FINT
-  | "list" -> FLIST
+  | "booletfarm" -> FBOOL
+  | "intperator" -> FINT
+  | "war_rig" -> FLIST
   | "float" -> FFLOAT
   | _ -> failwith "Not a type";;
 
@@ -79,7 +79,7 @@ let rec print_res res = match res with
   | (FuryIf(e1,e2, e3)) -> print_string "if " ; print_res e1 ; print_string " then " ; exprlisttostring e2 ; print_string " else " ; exprlisttostring e3
   | (FuryFor(e1, e2, e3)) -> print_string "for " ; print_res e1 ; print_string " while " ; print_res e2; print_string " do " ; exprlisttostring e3
   | (FuryRead) -> print_string "reading stream"
-  | (FuryWrite(FuryInt(n))) -> print_string "writing out"
+  | (FuryWrite(n)) -> print_res n ; print_string "writing out"
   | (FuryDeclare(e1, e2, e3)) -> print_res e2 ; print_string " = " ; print_res e3
   | (FuryRebind(e1, e2)) -> print_string (e1 ^ " = ") ; print_res e2
   | _ -> raise NonBaseTypeResult

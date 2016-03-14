@@ -40,8 +40,7 @@ expr:
 ;
 
 sequence:
-  | expr EOL sequence        { $1 :: $3 }
-  | EOL sequence             { $2 }
+  | expr BREAK sequence      { $1 :: $3 }
   | expr                     { [$1] }
   |                          { [] }
 ;
@@ -54,8 +53,8 @@ primitive:
 ;
 
 declaration:
-  | TYPE VARIABLE EQUALS expr BREAK       { FuryDeclare($1, FuryPrimitive(FuryString($2)), $4)}
-  | VARIABLE EQUALS expr BREAK            { FuryRebind($1, $3) }
+  | TYPE VARIABLE EQUALS expr       { FuryDeclare($1, FuryPrimitive(FuryString($2)), $4)}
+  | VARIABLE EQUALS expr            { FuryRebind($1, $3) }
 ;
 
 numericaloperator:
@@ -76,10 +75,12 @@ bracketexpr:
   | LPAREN expr RPAREN       { ( $2 ) }
 ;
 forloop:
+  | IF LPAREN conditional RPAREN EOL THEN LPAREN sequence RPAREN EOL ELSE LPAREN sequence RPAREN                      { FuryIf ($3, $8, $13) }
   | IF LPAREN conditional RPAREN THEN LPAREN sequence RPAREN ELSE LPAREN sequence RPAREN                      { FuryIf ($3, $7, $11) }
+  | FORINIT LPAREN declaration RPAREN EOL FORCOND LPAREN conditional RPAREN EOL FORBODY LPAREN sequence RPAREN   { FuryFor ($3, $8, $13)}
   | FORINIT LPAREN declaration RPAREN FORCOND LPAREN conditional RPAREN FORBODY LPAREN sequence RPAREN   { FuryFor ($3, $7, $11)}
 ;
 func:
   | READ BREAK                          { FuryRead }
-  | WRITE primitive BREAK               { FuryWrite $2 }
+  | WRITE expr BREAK                    { FuryWrite $2 }
 ;

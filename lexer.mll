@@ -8,25 +8,26 @@ rule lexer = parse
       [' ' '\t']     { lexer lexbuf }     (* skip blanks *)
     | ['\n' ]  { EOL }
     | ['0'-'9']+ as lxm { INT(int_of_string lxm) }
-    | '+'      { PLUS }
-    | '-'      { MINUS }
+    | "risen_by"      { PLUS }
+    | "lowered_by"      { MINUS }
     | '*'      { TIMES }
     | '/'      { DIV }
     | '('      { LPAREN }
     | ')'      { RPAREN }
-    | '='      { EQUALS }
+    | "becomes"      { EQUALS }
     | "=="     { EQUALTO }
     | '<'      { LESSTHAN }
     | '>'      { GREATERTHAN }
     | ';'      { BREAK }
     | eof      { raise Eof }
+    | "war_rig" { LIST }
+    | "witness" { WRITE }
     | "read"   { READ }
-    | "write"  { WRITE }
-    | "ilive" { FORINIT }
-    | "idie"  { FORCOND }
-    | "iliveagain" { FORBODY }
-    | "if"     { IF }
-    | "then"   { THEN }
-    | "else"   { ELSE }
-    | "int"  | "float" | "bool" as lxm      { TYPE(stringtotype lxm) }
+    | "i_live" { FORINIT }
+    | "i_die"  { FORCOND }
+    | "i_live_again" { FORBODY }
+    | "am_i_awaited"     { IF }
+    | "then_ride_eternal_shiny_and_chrome"   { THEN }
+    | "or_die_historic_on_fury_road"   { ELSE }
+    | "intperator"  | "float" | "booletfarm" as lxm      { TYPE(stringtotype lxm) }
     | ['a'-'z''A'-'Z']+ as lxm { VARIABLE(lxm) }

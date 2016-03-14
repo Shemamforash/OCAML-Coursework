@@ -1,6 +1,6 @@
 open Str;;
 
-let write argument = Printf.printf "%d" argument ; Printf.printf "EOL";;
+let write argument = Printf.printf "%d" argument ; Printf.printf "\n";;
 
 let read : int list =
   let columnarr = ref [] in

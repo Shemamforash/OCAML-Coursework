@@ -1,14 +1,21 @@
 (3 < 4)
 (3 > 4)
 (3 == 4)
-(2 + 3)
-(2 - 3)
+(2 risen_by 3)
+(2 lowered_by 3)
 (2 * 3)
 (2 / 3)
-if (3 < 4) then (3 + 4) else (7 + 3)
-int y = 4;
-y
-y = y + 2;
-y
-ilive(y = 6;)idie(y < 10)iliveagain(y = y + 1;)
-y
+
+am_i_awaited (3 < 4)
+then_ride_eternal_shiny_and_chrome (3 risen_by 4)
+or_die_historic_on_fury_road (7 risen_by 3)
+
+intperator furiosa becomes 4
+furiosa
+
+furiosa becomes furiosa risen_by 2
+furiosa
+
+i_live (intperator max becomes 0)
+i_die (max < 10)
+i_live_again (max becomes max risen_by 1; witness max;)

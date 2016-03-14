@@ -111,14 +111,12 @@ let rec evaluate (env:environment) e = match e with
                                     let value' = evaluate env value in
                                       if ((typeofprimitive value')=(typeofprimitive value2))
                                         then ((bind env2 name value') ; FuryNull) else raise TypeMismatch
+
+  | (FuryWrite(e1)) -> let e1' = (evaluate env e1) in (match e1' with
+                                            | FuryInt(n) -> write n ; FuryNull
+                                            | _ -> raise TypeMismatch)
   (*
-
   | (FuryRead) -> (FuryList(Functions.read))
-
-  | (FuryWrite(FuryInt(n))) -> Functions.write(n) ; raise Terminated
-  | (FuryWrite(e1)) -> let e1' = (evaluate env e1) in FuryWrite(e1')
-
-
   *)
 
   | _ -> raise Terminated
@@ -131,7 +129,3 @@ and evaluateSequence env seq = match seq with
   | ([])                -> FuryNull
   | (e1 :: [])          -> evaluate env e1
   | (e1 :: e2)          -> evaluate env e1 ; evaluateSequence env e2
-
-(* let rec evalloop env e = try (let (e',env') = (evaluate env e) in (evalloop env' e')) with Terminated -> if (isValue e) then e else raise StuckTerm  ;;
-let evalProg e = evalloop (Env []) e ;;
-let typeProg e = typeOf (Env []) e ;;*)
