@@ -16,7 +16,9 @@ let arg =
       try
         let result = main lexer lexbuf
         in match result with
-        | FuryTerm e -> let evaluated = (evaluate root e) in print_primitive evaluated ; print_string "\n" ; flush stdout
+        | FuryTerm e -> let evaluated = (evaluate root e) in (match evaluated with
+                    | FuryNull -> print_string "\n\n"
+                    | _ -> print_primitive evaluated ; print_string "\n\n" ; flush stdout)
         | Nothing -> ()
       with
       | Parsing.Parse_error -> failwith "Parse failure!"

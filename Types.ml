@@ -31,16 +31,18 @@ and furyterm =
   | FuryDeclare of furytype * furyterm * furyterm
   | FuryRebind of string * furyterm
   | FuryFor of furyterm * furyterm * (furyterm list)
+  | FuryListDeclare of string
+  | FuryAddToList of string * furyterm
+  | FuryReplaceInList of string * furyterm
+  | FuryGetFromList of string * furyterm
 
 type environment =
   | Environment of environment * ((string, furyprimitive) Hashtbl.t)
   | NullEnvironment
 
 let stringtotype = function
-  | "booletfarm" -> FBOOL
   | "intperator" -> FINT
   | "war_rig" -> FLIST
-  | "float" -> FFLOAT
   | _ -> failwith "Not a type";;
 
 let typetostring = function
@@ -53,7 +55,7 @@ let typetostring = function
 
 let rec listtostring = function
   | [] -> ""
-  | hd :: [] -> string_of_int hd ^ ", "
+  | hd :: [] -> string_of_int hd ^ ""
   | hd :: tl -> string_of_int hd ^ ", " ^ listtostring tl
 
 let print_primitive p = match p with
@@ -67,24 +69,26 @@ let print_primitive p = match p with
 
 let rec print_res res = match res with
   | (FuryPrimitive p) -> print_primitive p
-  | (FuryVar x) -> print_string (x ^ " x = ")
-  | (FuryNegate e) -> print_string "-" ; print_res e
-  | (FuryLessThan(e1, e2)) -> print_res e1 ; print_string " < " ; print_res e2
-  | (FuryMoreThan(e1, e2)) -> print_res e1 ; print_string " > " ; print_res e2
-  | (FuryEqualTo(e1, e2)) -> print_res e1 ; print_string " == " ; print_res e2
-  | (FuryPlus(e1, e2)) -> print_res e1 ; print_string " + " ; print_res e2
-  | (FuryMinus(e1, e2)) -> print_res e1 ; print_string " - " ; print_res e2
-  | (FuryDivide(e1, e2)) -> print_res e1 ; print_string " / " ; print_res e2
-  | (FuryTimes(e1, e2)) -> print_res e1 ; print_string " x " ; print_res e2
-  | (FuryIf(e1,e2, e3)) -> print_string "if " ; print_res e1 ; print_string " then " ; exprlisttostring e2 ; print_string " else " ; exprlisttostring e3
-  | (FuryFor(e1, e2, e3)) -> print_string "for " ; print_res e1 ; print_string " while " ; print_res e2; print_string " do " ; exprlisttostring e3
+  | (FuryVar x) -> print_string ("variable \"" ^ x ^ "\" evaluates to ")
+  | (FuryNegate e) -> print_string "negating " ; print_res e ; print_string " evaluates to -" ; print_res e
+  | (FuryLessThan(e1, e2)) -> print_string "condition \"" ; print_res e1 ; print_string " < " ; print_res e2 ; print_string "\" evaluates to "
+  | (FuryMoreThan(e1, e2)) -> print_string "condition \"" ; print_res e1 ; print_string " > " ; print_res e2 ; print_string "\" evaluates to "
+  | (FuryEqualTo(e1, e2)) -> print_string "condition \"" ; print_res e1 ; print_string " == " ; print_res e2 ; print_string "\" evaluates to "
+  | (FuryPlus(e1, e2)) -> print_string "operation \"" ; print_res e1 ; print_string " + " ; print_res e2 ; print_string "\" evaluates to "
+  | (FuryMinus(e1, e2)) -> print_string "operation \"" ; print_res e1 ; print_string " - " ; print_res e2 ; print_string "\" evaluates to "
+  | (FuryDivide(e1, e2)) -> print_string "operation \"" ; print_res e1 ; print_string " / " ; print_res e2 ; print_string "\" evaluates to "
+  | (FuryTimes(e1, e2)) -> print_string "operation \"" ; print_res e1 ; print_string " x " ; print_res e2 ; print_string "\" evaluates to "
+  | (FuryIf(e1,e2, e3)) -> print_string "if " ; print_res e1 ; print_string "true \n   then evaluate " ; exprlisttostring e2 ; print_string " \n   else evaluate " ; exprlisttostring e3
+  | (FuryFor(e1, e2, e3)) -> print_string "start loop by " ; print_res e1 ; print_string "\n then while " ; print_res e2; print_string "\n is true, do " ; exprlisttostring e3
   | (FuryRead) -> print_string "reading stream"
-  | (FuryWrite(n)) -> print_res n ; print_string "writing out"
-  | (FuryDeclare(e1, e2, e3)) -> print_res e2 ; print_string " = " ; print_res e3
-  | (FuryRebind(e1, e2)) -> print_string (e1 ^ " = ") ; print_res e2
+  | (FuryWrite(n)) -> print_string "writing " ; print_res n
+  | (FuryDeclare(e1, e2, e3)) -> print_string "binding new variable \"" ; print_res e2 ; print_string "\" as " ; print_res e3
+  | (FuryRebind(e1, e2)) -> print_string ("rebinding " ^ e1 ^ " as ") ; print_res e2
+  | (FuryListDeclare(e1)) -> print_string ("binding new list " ^ e1)
+  | (FuryAddToList(e1, e2)) -> print_string "adding " ; print_res e2 ; print_string (" to list " ^ e1)
   | _ -> raise NonBaseTypeResult
 
 and exprlisttostring = function
     | [] -> print_string "body end"
-    | hd :: [] -> print_res hd
-    | hd :: tl -> print_res hd ; exprlisttostring tl
+    | hd :: [] -> print_res hd ; print_string "\n"
+    | hd :: tl -> print_res hd ; print_string "\n" ; exprlisttostring tl

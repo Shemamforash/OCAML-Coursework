@@ -19,8 +19,12 @@ rule lexer = parse
     | '<'      { LESSTHAN }
     | '>'      { GREATERTHAN }
     | ';'      { BREAK }
+    | "war_rig" { LIST[] }
+    | "repair" { LISTREPLACE }
+    | "improve" { LISTADD }
+    | "find_in" { LISTGET }
+    | "reversed" { NEGATE }
     | eof      { raise Eof }
-    | "war_rig" { LIST }
     | "witness" { WRITE }
     | "read"   { READ }
     | "i_live" { FORINIT }
@@ -29,5 +33,5 @@ rule lexer = parse
     | "am_i_awaited"     { IF }
     | "then_ride_eternal_shiny_and_chrome"   { THEN }
     | "or_die_historic_on_fury_road"   { ELSE }
-    | "intperator"  | "float" | "booletfarm" as lxm      { TYPE(stringtotype lxm) }
+    | "intperator" as lxm { TYPE(stringtotype lxm) }
     | ['a'-'z''A'-'Z']+ as lxm { VARIABLE(lxm) }

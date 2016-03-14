@@ -1,21 +1,25 @@
-(3 < 4)
-(3 > 4)
-(3 == 4)
-(2 risen_by 3)
-(2 lowered_by 3)
-(2 * 3)
-(2 / 3)
+3 < 4
+3 > 4
+3 == 4
+2 risen_by 3
+2 lowered_by 3
+2 * 3
+2 / 3
 
-am_i_awaited (3 < 4)
-then_ride_eternal_shiny_and_chrome (3 risen_by 4)
-or_die_historic_on_fury_road (7 risen_by 3)
+war_rig boneshaker
+improve boneshaker 4
+boneshaker
+
+am_i_awaited 3 < 4
+then_ride_eternal_shiny_and_chrome 3 risen_by 4
+or_die_historic_on_fury_road 7 risen_by 3
 
 intperator furiosa becomes 4
-furiosa
-
+furiosa < 2
+furiosa becomes furiosa reversed
 furiosa becomes furiosa risen_by 2
 furiosa
 
-i_live (intperator max becomes 0)
-i_die (max < 10)
-i_live_again (max becomes max risen_by 1; witness max;)
+i_live intperator max becomes 0
+i_die max < 10
+i_live_again max becomes max risen_by 1; witness max;
