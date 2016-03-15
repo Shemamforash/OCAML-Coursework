@@ -27,14 +27,15 @@ and furyterm =
 (*  | FuryFor of furyterm * furyterm * furyterm  *)
   | FuryVar of string
   | FuryRead
-  | FuryWrite of furyterm
-  | FuryDeclare of furytype * furyterm * furyterm
+  | FuryWrite of string
+  | FuryDeclare of furytype * string * furyterm
   | FuryRebind of string * furyterm
   | FuryFor of furyterm * furyterm * (furyterm list)
   | FuryListDeclare of string
   | FuryAddToList of string * furyterm
   | FuryReplaceInList of string * furyterm
   | FuryGetFromList of string * furyterm
+  | FuryIsListEmpty of string
 
 type environment =
   | Environment of environment * ((string, furyprimitive) Hashtbl.t)
@@ -43,7 +44,7 @@ type environment =
 let stringtotype = function
   | "intperator" -> FINT
   | "war_rig" -> FLIST
-  | _ -> failwith "Not a type";;
+  | _ -> print_string "waffle" ; failwith "Not a type";;
 
 let typetostring = function
   | FBOOL -> "bool"
@@ -81,11 +82,13 @@ let rec print_res res = match res with
   | (FuryIf(e1,e2, e3)) -> print_string "if " ; print_res e1 ; print_string "true \n   then evaluate " ; exprlisttostring e2 ; print_string " \n   else evaluate " ; exprlisttostring e3
   | (FuryFor(e1, e2, e3)) -> print_string "start loop by " ; print_res e1 ; print_string "\n then while " ; print_res e2; print_string "\n is true, do " ; exprlisttostring e3
   | (FuryRead) -> print_string "reading stream"
-  | (FuryWrite(n)) -> print_string "writing " ; print_res n
-  | (FuryDeclare(e1, e2, e3)) -> print_string "binding new variable \"" ; print_res e2 ; print_string "\" as " ; print_res e3
+  | (FuryWrite(n)) -> print_string ("writing " ^ n)
+  | (FuryDeclare(e1, e2, e3)) -> print_string ("binding new variable \"" ^ e2 ^ "\" as ") ; print_res e3
   | (FuryRebind(e1, e2)) -> print_string ("rebinding " ^ e1 ^ " as ") ; print_res e2
   | (FuryListDeclare(e1)) -> print_string ("binding new list " ^ e1)
   | (FuryAddToList(e1, e2)) -> print_string "adding " ; print_res e2 ; print_string (" to list " ^ e1)
+  | (FuryGetFromList(e1, e2)) -> print_string ("element in list " ^ e1 ^ " at position ") ; print_res e2 ; print_string " is "
+  | (FuryIsListEmpty e1) -> print_string ("list " ^ e1 ^ " is empty? evaluates to ")
   | _ -> raise NonBaseTypeResult
 
 and exprlisttostring = function

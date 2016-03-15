@@ -21,7 +21,11 @@ let arg =
                     | _ -> print_primitive evaluated ; print_string "\n\n" ; flush stdout)
         | Nothing -> ()
       with
-      | Parsing.Parse_error -> failwith "Parse failure!"
+      | Parsing.Parse_error -> (let curr = lexbuf.Lexing.lex_curr_p in
+            let line = curr.Lexing.pos_lnum in
+              let cnum = curr.Lexing.pos_cnum - curr.Lexing.pos_bol in
+                let tok = Lexing.lexeme lexbuf in
+                  failwith ("Parsing error at: line" ^ (string_of_int line) ^ " character " ^ (string_of_int cnum) ^ " token " ^ tok))
     done
   ) with
   | Lexer.Eof ->  flush stdout ; exit 0;

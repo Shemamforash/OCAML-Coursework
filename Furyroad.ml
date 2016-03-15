@@ -72,6 +72,7 @@ let isexprtype env e ty = (typeofprimitive e)=ty
 
 let rec evaluate (env:environment) e = match e with
   | (FuryVar x) ->  print_res e ; let (n, v) = (try (lookup x env) with LookupError -> raise UnboundVariableError) in v
+
   | (FuryPrimitive p) ->  evaluateprimitive p
 
   | (FuryNegate (e1)) -> let e1' = (evaluate env e1) in if (isexprtype env e1' FINT) then negate e1' else raise TypeMismatch
@@ -98,23 +99,21 @@ let rec evaluate (env:environment) e = match e with
 
   | (FuryFor(e1, e2, e3)) -> print_res e ; let env2 = Environment (env, (Hashtbl.create(5))) in
                                   let v = (evaluate env2 e1) in
-                                  if (isexprtype env2 (evaluate env2 e2) FBOOL) then (
+                                  (if (isexprtype env2 (evaluate env2 e2) FBOOL) then (
                                       while (let b = (evaluate env2 e2) in match b with FuryBool b -> b | _ -> raise TypeError) do
-                                         let env3 = Environment(env2, (Hashtbl.create(5))) in evaluateSequence env3 e3
-                                      done ; FuryNull )
-                                  else raise TypeMismatch
+                                         let env3 = Environment(env2, (Hashtbl.create(5))) in (evaluateSequence env3 e3)
+                                      done ; FuryNull)
+                                  else raise TypeMismatch)
 
-  | (FuryDeclare(t, name, value)) -> print_res e ; if t=FINT then let name' = evaluate env name in (match name' with
-                                        | FuryString(n) -> ((bind env n (evaluate env value)) ; FuryNull)
-                                        | _ -> FuryNull) else raise TypeError
+  | (FuryDeclare(t, name, value)) -> print_res e ; if t=FINT then (bind env name (evaluate env value)) ; FuryNull
 
   | (FuryRebind(name, value)) -> print_res e ; let (env2, value2) = lookup name env in
                                     let value' = evaluate env value in
                                       if ((typeofprimitive value')=(typeofprimitive value2))
                                         then ((bind env2 name value') ; FuryNull) else raise TypeMismatch
 
-  | (FuryWrite(e1)) -> print_res e ; let e1' = (evaluate env e1) in (match e1' with
-                                            | FuryInt(n) -> write n ; FuryNull
+  | (FuryWrite(e1)) -> print_res e ; let (env, value) = (lookup e1 env) in (match value with
+                                            | FuryList(n) -> write n ; FuryNull
                                             | _ -> raise TypeMismatch)
 
   | (FuryListDeclare(name)) -> print_res e ; (bind env name (FuryList([]))) ; FuryNull
@@ -127,6 +126,17 @@ let rec evaluate (env:environment) e = match e with
                                                                           | _ -> raise TypeMismatch)
                                                         | _ -> raise TypeMismatch) ; FuryNull
 
+  | (FuryGetFromList(name, pos)) -> print_res e ; let (env2, list2) = lookup name env in
+                                                    let pos' = evaluate env pos in
+                                                      (match pos' with
+                                                        | FuryInt(n) -> (match list2 with
+                                                                          | FuryList(ls) -> (FuryInt(List.nth ls n))
+                                                                          | _ -> raise TypeMismatch)
+                                                        | _ -> raise TypeMismatch)
+
+  | (FuryIsListEmpty(name)) -> print_res e ; let (env2, list2) = lookup name env in (match list2 with
+                                                        | FuryList(ls) -> if (List.length ls)=0 then FuryBool(true) else FuryBool(false)
+                                                        | _ -> raise TypeMismatch )
   (*
   | (FuryRead) -> (FuryList(Functions.read))
   *)
@@ -135,7 +145,9 @@ let rec evaluate (env:environment) e = match e with
 
 and applymathsfunc func env e1 e2 = let e1' = (evaluate env e1) in
                   let e2' = (evaluate env e2) in
-                    if ((isexprtype env e1' FINT) && (isexprtype env e2' FINT)) then (func e1' e2') else raise TypeMismatch
+                    if ((isexprtype env e1' FINT) || (isexprtype env e1' FFLOAT)) then
+                        (if ((isexprtype env e2' FINT) || (isexprtype env e2' FFLOAT)) then (func e1' e2') else raise TypeMismatch)
+                          else raise TypeMismatch
 
 and evaluateSequence env seq = match seq with
   | ([])                -> FuryNull
