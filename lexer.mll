@@ -11,14 +11,16 @@ rule lexer = parse
     | '?'                                         { QUESTION }
     | eof      { raise Eof }
     | "intperator" as lxm                         { TYPE(stringtotype lxm) }
-    | ['a'-'z''A'-'Z']+ as lxm                    { VARIABLE(lxm) }
+    | '/'                                         { LP }
+    | '\\'                                        { RP }
 
     (* mathematical operators *)
-    | "risen_by"                                  { PLUS }
-    | "lowered_by"                                { MINUS }
-    | "powered_by"                                { TIMES }
+    | "increase_speed_by"                         { PLUS }
+    | "decrease_speed_by"                         { MINUS }
+    | "overcharged_by"                            { TIMES }
     | "slashed_by"                                { DIV }
-    | "reversed"                                  { NEGATE }
+    | "shift"                                     { NEGATESTART }
+    | "into_reverse"                              { NEGATEEND }
     | "becomes"                                   { EQUALS }
 
     (* conditional operators *)
@@ -44,3 +46,5 @@ rule lexer = parse
     | "am_i_awaited"                              { IF }
     | "then_ride_eternal_shiny_and_chrome"        { THEN }
     | "or_die_historic_on_fury_road"              { ELSE }
+
+    | ['a'-'z''A'-'Z']+ as lxm                    { VARIABLE(lxm) }

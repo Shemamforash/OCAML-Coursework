@@ -1,4 +1,5 @@
 exception TypeError;;
+exception DivideByZero;;
 
 open Types;;
 

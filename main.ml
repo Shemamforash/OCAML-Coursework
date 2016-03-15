@@ -1,11 +1,12 @@
 open Furyroad
-open Functions
 open Types
 open Lexer
 open Parser
 open Printf
+open Scanf
 
 let program_file = open_in Sys.argv.(1);;
+
 let voidEnv = NullEnvironment;;
 let root = Environment (voidEnv, Hashtbl.create(5));;
 

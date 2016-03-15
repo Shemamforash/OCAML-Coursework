@@ -38,7 +38,7 @@ let rec typeofexpression e = match e with
   |FuryNegate (e1) -> FINT
   |FuryIf (e1,e2,e3) -> FVOID
   |FuryFor (e1, e2, e3) -> FVOID
-  |FuryRead -> FLIST
+  |FuryRead (e1) -> FVOID
   |FuryWrite(n) -> FINT
   |FuryDeclare(t, n, v) -> FVOID
   |FuryRebind(n, v) -> FVOID
@@ -97,8 +97,7 @@ let rec evaluate (env:environment) e = match e with
                                       | _ -> raise TypeMismatch
                                     else raise TypeMismatch
 
-  | (FuryFor(e1, e2, e3)) -> print_res e ; let env2 = Environment (env, (Hashtbl.create(5))) in
-                                  let v = (evaluate env2 e1) in
+  | (FuryFor(e1, e2, e3)) -> print_res e ; let env2 = Environment (env, (Hashtbl.create(5))) in (evaluate env2 e1) ;
                                   (if (isexprtype env2 (evaluate env2 e2) FBOOL) then (
                                       while (let b = (evaluate env2 e2) in match b with FuryBool b -> b | _ -> raise TypeError) do
                                          let env3 = Environment(env2, (Hashtbl.create(5))) in (evaluateSequence env3 e3)
@@ -137,9 +136,9 @@ let rec evaluate (env:environment) e = match e with
   | (FuryIsListEmpty(name)) -> print_res e ; let (env2, list2) = lookup name env in (match list2 with
                                                         | FuryList(ls) -> if (List.length ls)=0 then FuryBool(true) else FuryBool(false)
                                                         | _ -> raise TypeMismatch )
-  (*
-  | (FuryRead) -> (FuryList(Functions.read))
-  *)
+
+  | (FuryRead(name)) -> print_res e ; let (env2, value2) = lookup name env in
+                                        (bind env2 name (FuryList(readstream ()))) ; FuryNull
 
   | _ -> raise Terminated
 

@@ -1,5 +1,7 @@
 exception NonBaseTypeResult;;
 
+let viewtrace = true;;
+
 type furytype = FINT | FLIST | FBOOL | FSTRING | FVOID | FFLOAT
 
 type out = Nothing | FuryTerm of furyterm
@@ -26,7 +28,7 @@ and furyterm =
   | FuryIf of furyterm * (furyterm list) * (furyterm list)
 (*  | FuryFor of furyterm * furyterm * furyterm  *)
   | FuryVar of string
-  | FuryRead
+  | FuryRead of string
   | FuryWrite of string
   | FuryDeclare of furytype * string * furyterm
   | FuryRebind of string * furyterm
@@ -68,7 +70,7 @@ let print_primitive p = match p with
   | (FuryFloat f) -> print_float f
   | (FuryNull) -> print_string "Null"
 
-let rec print_res res = match res with
+let rec print_res res = if viewtrace then (match res with
   | (FuryPrimitive p) -> print_primitive p
   | (FuryVar x) -> print_string ("variable \"" ^ x ^ "\" evaluates to ")
   | (FuryNegate e) -> print_string "negating " ; print_res e ; print_string " evaluates to -" ; print_res e
@@ -81,7 +83,7 @@ let rec print_res res = match res with
   | (FuryTimes(e1, e2)) -> print_string "operation \"" ; print_res e1 ; print_string " x " ; print_res e2 ; print_string "\" evaluates to "
   | (FuryIf(e1,e2, e3)) -> print_string "if " ; print_res e1 ; print_string "true \n   then evaluate " ; exprlisttostring e2 ; print_string " \n   else evaluate " ; exprlisttostring e3
   | (FuryFor(e1, e2, e3)) -> print_string "start loop by " ; print_res e1 ; print_string "\n then while " ; print_res e2; print_string "\n is true, do " ; exprlisttostring e3
-  | (FuryRead) -> print_string "reading stream"
+  | (FuryRead e1) -> print_string ("reading stream into" ^ e1)
   | (FuryWrite(n)) -> print_string ("writing " ^ n)
   | (FuryDeclare(e1, e2, e3)) -> print_string ("binding new variable \"" ^ e2 ^ "\" as ") ; print_res e3
   | (FuryRebind(e1, e2)) -> print_string ("rebinding " ^ e1 ^ " as ") ; print_res e2
@@ -89,7 +91,7 @@ let rec print_res res = match res with
   | (FuryAddToList(e1, e2)) -> print_string "adding " ; print_res e2 ; print_string (" to list " ^ e1)
   | (FuryGetFromList(e1, e2)) -> print_string ("element in list " ^ e1 ^ " at position ") ; print_res e2 ; print_string " is "
   | (FuryIsListEmpty e1) -> print_string ("list " ^ e1 ^ " is empty? evaluates to ")
-  | _ -> raise NonBaseTypeResult
+  | _ -> raise NonBaseTypeResult) else print_string ""
 
 and exprlisttostring = function
     | [] -> print_string "body end"

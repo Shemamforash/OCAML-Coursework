@@ -8,13 +8,13 @@
 %token <string> VARIABLE
 %token LIST
 %token <Types.furytype> TYPE
-%token PLUS MINUS TIMES DIV EQUALS NEGATE
+%token PLUS MINUS TIMES DIV EQUALS NEGATESTART NEGATEEND
 %token LESSTHAN GREATERTHAN EQUALTO
 %token LISTADD LISTGET LISTEMPTY
 %token EOL BREAK QUESTION
 %token FORINIT FORCOND FORBODY
 %token READ WRITE
-%token IF THEN ELSE
+%token IF THEN ELSE LP RP
 
 %left EQUALTO LESSTHAN GREATERTHAN    /* lowest precedence */
 %left PLUS MINUS                      /* medium precedence */
@@ -42,19 +42,19 @@ expr:
 ;
 
 listoperator:
-  | LISTADD VARIABLE numericaloperator                                                     { FuryAddToList($2, $3) }
-  | LISTGET VARIABLE numericaloperator                                                     { FuryGetFromList($2, $3) }
+  | LISTADD VARIABLE primitives                                                            { FuryAddToList($2, $3) }
+  | LISTGET VARIABLE primitives                                                            { FuryGetFromList($2, $3) }
   | LISTEMPTY VARIABLE QUESTION                                                            { FuryIsListEmpty $2 }
 ;
 
 sequence:
-  | expr BREAK sequence                                                                    { $1 :: $3 }
+  | expr BREAK EOL sequence                                                                { $1 :: $4 }
   | expr                                                                                   { [$1] }
   |                                                                                        { [] }
 ;
 
 declaration:
-  | TYPE VARIABLE EQUALS numericaloperator                                                 { FuryDeclare($1, $2, $4) }
+  | TYPE VARIABLE EQUALS primitives                                                        { FuryDeclare($1, $2, $4) }
   | VARIABLE EQUALS numericaloperator                                                      { FuryRebind($1, $3) }
   | LIST VARIABLE                                                                          { FuryListDeclare($2) }
 ;
@@ -70,7 +70,7 @@ numericaloperator:
   | primitives MINUS primitives                                                            { FuryMinus ($1, $3) }
   | primitives TIMES primitives                                                            { FuryTimes ($1, $3) }
   | primitives DIV primitives                                                              { FuryDivide ($1, $3) }
-  | primitives NEGATE %prec UMINUS                                                         { FuryNegate $1 }
+  | NEGATESTART primitives NEGATEEND %prec UMINUS                                          { FuryNegate $2 }
 ;
 
 conditional:
@@ -83,7 +83,8 @@ forloop:
   | IF EOL conditional EOL THEN EOL sequence EOL ELSE EOL sequence                         { FuryIf ($3, $7, $11) }
   | FORINIT EOL declaration EOL FORCOND EOL conditional EOL FORBODY EOL sequence           { FuryFor($3, $7, $11)}
 ;
+
 func:
-  | READ                                                                                   { FuryRead }
+  | VARIABLE EQUALS READ                                                                   { FuryRead $1 }
   | WRITE VARIABLE                                                                         { FuryWrite $2 }
 ;
