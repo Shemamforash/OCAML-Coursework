@@ -1,0 +1,30 @@
+intperator fibval becomes 1
+war_party fiblist
+ride_with fiblist 1
+ride_with fiblist 1
+war_party streamhistory
+
+i_live
+  war_party immortanfibonacci becomes read
+i_die
+  is_war_party_riding immortanfibonacci ?
+i_live_again
+/ intperator prev becomes find_in fiblist fibval V8
+  intperator prevtwo becomes find_in fiblist fibval decrease_speed_by 1 V8
+  intperator sum becomes prev increase_speed_by prevtwo V8
+  ride_with fiblist sum V8
+  ride_with streamhistory find_in immortanfibonacci 0 V8
+  intperator out becomes 0 V8
+    i_live
+      intperator cnt becomes fibval decrease_speed_by 1
+    i_die
+      cnt is_immortan_to shift 1 into_reverse ?
+    i_live_again
+    / intperator temp becomes fibval decrease_speed_by cnt decrease_speed_by 1 V8
+      temp becomes find_in fiblist temp V8
+      temp becomes temp overcharged_by find_in streamhistory cnt V8
+      out becomes out increase_speed_by temp V8
+      cnt becomes cnt decrease_speed_by 1 \ V8
+  witness out V8
+  fibval becomes fibval increase_speed_by 1 V8
+  immortanfibonacci becomes read \

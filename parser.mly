@@ -76,8 +76,8 @@ conditional:
 ;
 
 forloop:
-  | IF EOL conditional EOL THEN EOL sequence EOL ELSE EOL sequence                         { FuryIf ($3, $7, $11) }
-  | FORINIT EOL declaration EOL FORCOND EOL conditional EOL FORBODY EOL sequence           { FuryFor($3, $7, $11)}
+  | IF EOL conditional EOL THEN EOL sequence EOL ELSE EOL LP sequence RP                   { FuryIf ($3, $7, $12) }
+  | FORINIT EOL declaration EOL FORCOND EOL conditional EOL FORBODY EOL LP sequence RP     { FuryFor($3, $7, $12)}
 ;
 
 func:

@@ -2,6 +2,7 @@
 {
 open Parser        (* The type token is defined in parser.mli *)
 open Types
+open Printer
 exception Eof
 }
 rule lexer = parse
@@ -9,7 +10,7 @@ rule lexer = parse
     | ['\n' ]                                     { EOL }
     | ['0'-'9']+ as lxm                           { INT(int_of_string lxm) }
     | '?'                                         { QUESTION }
-    | eof      { raise Eof }
+    | eof                                         { raise Eof }
     | "intperator" as lxm                         { TYPE(stringtotype lxm) }
     | '/'                                         { LP }
     | '\\'                                        { RP }

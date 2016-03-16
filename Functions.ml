@@ -25,7 +25,7 @@ let readstream () : int list=
   let arr = [] in
       let rawline = getfromstream () in (match rawline with
         | None -> []
-        | Some line -> let linearr = Str.split (Str.regexp " ") line in List.rev (stringlisttointlist linearr arr))
+        | Some line -> let linearr = Str.split (Str.regexp " ") line in stringlisttointlist linearr arr)
 
 let rec write argument = match argument with
   | [] -> print_string ""

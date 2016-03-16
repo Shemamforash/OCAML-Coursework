@@ -5,9 +5,9 @@ i_live
 i_die
   is_war_party_riding imitator ?
 i_live_again
-  temporusrex becomes find_in imitator 0 V8
+/ temporusrex becomes find_in imitator 0 V8
   war_party doubledeuce                          V8
   ride_with doubledeuce temporusrex              V8
   ride_with doubledeuce temporusrex              V8
   witness doubledeuce                            V8
-  imitator becomes read
+  imitator becomes read \

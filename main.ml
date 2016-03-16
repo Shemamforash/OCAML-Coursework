@@ -1,9 +1,11 @@
-open Furyroad
-open Types
-open Lexer
-open Parser
-open Printf
-open Scanf
+open Furyroad;;
+open Types;;
+open Lexer;;
+open Parser;;
+open Printf;;
+open Scanf;;
+open Printer;;
+open Exceptions;;
 
 let program_file = open_in Sys.argv.(1);;
 
@@ -22,11 +24,14 @@ let arg =
                     | _ -> print_primitive evaluated ; print_string "\n" ; flush stdout)
         | Nothing -> ()
       with
-      | Parsing.Parse_error -> (let curr = lexbuf.Lexing.lex_curr_p in
-            let line = curr.Lexing.pos_lnum in
-              let cnum = curr.Lexing.pos_cnum - curr.Lexing.pos_bol in
-                let tok = Lexing.lexeme lexbuf in
-                  failwith ("Parsing error at: line" ^ (string_of_int line) ^ " character " ^ (string_of_int cnum) ^ " token " ^ tok))
+          | Parsing.Parse_error -> Printf.eprintf "%s\n" "Parse error (maybe you mispelled something?) at " ; flush stderr
+          | TypeError -> Printf.eprintf "%s\n" "Bad type used" ; flush stderr
+          | DivideByZero -> Printf.eprintf "%s\n" "Divide by zero" ; flush stderr
+          | RootEnvironmentLeft -> Printf.eprintf "%s\n" "Unbound variable used" ; flush stderr
+          | TypeMismatch -> Printf.eprintf "%s\n" "Variable types do not match" ; flush stderr
+          | VariableAlreadyDeclared -> Printf.eprintf "%s\n" "Variable has already been declared" ; flush stderr
+          | OutOfBounds -> Printf.eprintf "%s\n" "List access out of bounds" ; flush stderr
+          | NonBaseTypeResult -> Printf.eprintf "%s\n" "Tried to evaluate bad expression." ; flush stderr
     done
   ) with
   | Lexer.Eof ->  flush stdout ; exit 0;

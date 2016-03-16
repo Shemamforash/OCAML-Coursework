@@ -6,7 +6,7 @@ i_live
 i_die
   is_war_party_riding counterman ?
 i_live_again
-  leftarm becomes find_in counterman 0                            V8
+/ leftarm becomes find_in counterman 0                            V8
   rightarm becomes find_in counterman 1                           V8
   witness leftarm increase_speed_by rightarm overcharged_by 3     V8
-  counterman becomes read
+  counterman becomes read \

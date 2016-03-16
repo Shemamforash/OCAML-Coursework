@@ -1,7 +1,13 @@
-exception TypeError;;
-exception DivideByZero;;
-
+open Exceptions;;
 open Types;;
+
+let rec lookup objectname environment = match environment with
+    | NullEnvironment -> raise RootEnvironmentLeft
+    | Environment(parent, lst) -> try (environment, Hashtbl.find lst objectname) with Not_found -> (lookup objectname parent)
+
+let bind env name newobject = match env with
+    | Environment(_, hash) -> Hashtbl.replace hash name newobject
+    | NullEnvironment -> raise RootEnvironmentLeft
 
 let negate n = match n with
   | (FuryInt n) -> FuryInt(-n)
