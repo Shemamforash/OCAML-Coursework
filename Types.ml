@@ -38,6 +38,7 @@ and furyterm =
   | FuryReplaceInList of string * furyterm
   | FuryGetFromList of string * furyterm
   | FuryIsListEmpty of string
+  | FuryListDeclareWithRead of string
 
 type environment =
   | Environment of environment * ((string, furyprimitive) Hashtbl.t)
@@ -91,6 +92,7 @@ let rec print_res res = if viewtrace then (match res with
   | (FuryAddToList(e1, e2)) -> print_string "adding " ; print_res e2 ; print_string (" to list " ^ e1)
   | (FuryGetFromList(e1, e2)) -> print_string ("element in list " ^ e1 ^ " at position ") ; print_res e2 ; print_string " is "
   | (FuryIsListEmpty e1) -> print_string ("list " ^ e1 ^ " is empty? evaluates to ")
+  | (FuryListDeclareWithRead name) -> print_string ("binding new list" ^ name ^ " as ")
   | _ -> raise NonBaseTypeResult) else print_string ""
 
 and exprlisttostring = function

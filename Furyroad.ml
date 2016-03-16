@@ -5,18 +5,19 @@ exception LookupError;;
 exception StuckTerm;;
 exception RootEnvironmentLeft;;
 exception TypeMismatch;;
+exception VariableAlreadyDeclared;;
 
 open Functions;;
 open Types;;
 open EvaluationFunctions;;
 
 let rec lookup objectname environment = match environment with
-    | NullEnvironment -> print_string ("No binding for " ^ objectname) ; raise RootEnvironmentLeft
+    | NullEnvironment -> raise RootEnvironmentLeft
     | Environment(parent, lst) -> try (environment, Hashtbl.find lst objectname) with Not_found -> (lookup objectname parent)
 
 let bind env name newobject = match env with
-    | Environment(_, lst) ->  Hashtbl.replace lst name newobject
-    | NullEnvironment -> raise RootEnvironmentLeft
+      | Environment(_, lst) ->  Hashtbl.replace lst name newobject
+      | NullEnvironment -> raise RootEnvironmentLeft
 
 let typeofprimitive p = match p with
   |FuryInt (n) -> FINT
@@ -104,7 +105,9 @@ let rec evaluate (env:environment) e = match e with
                                       done ; FuryNull)
                                   else raise TypeMismatch)
 
-  | (FuryDeclare(t, name, value)) -> print_res e ; if t=FINT then (bind env name (evaluate env value)) ; FuryNull
+  | (FuryDeclare(t, name, value)) -> print_res e ; if t=FINT then
+                  (try (let (e, h) = (lookup name env) in raise VariableAlreadyDeclared) with RootEnvironmentLeft -> (bind env name (evaluate env value)) ; FuryNull)
+                    else raise TypeMismatch
 
   | (FuryRebind(name, value)) -> print_res e ; let (env2, value2) = lookup name env in
                                     let value' = evaluate env value in
@@ -115,7 +118,9 @@ let rec evaluate (env:environment) e = match e with
                                             | FuryList(n) -> write n ; FuryNull
                                             | _ -> raise TypeMismatch)
 
-  | (FuryListDeclare(name)) -> print_res e ; (bind env name (FuryList([]))) ; FuryNull
+  | (FuryListDeclare(name)) -> print_res e ; (try (let (e, h) = (lookup name env) in raise VariableAlreadyDeclared) with RootEnvironmentLeft -> (bind env name (FuryList([]))) ; FuryNull)
+
+  | (FuryListDeclareWithRead(name)) -> print_res e ; (bind env name(FuryList(readstream ()))) ; FuryNull
 
   | (FuryAddToList(name, value)) -> print_res e ; let (env2, list2) = lookup name env in
                                                     let value' = evaluate env value in
@@ -134,7 +139,7 @@ let rec evaluate (env:environment) e = match e with
                                                         | _ -> raise TypeMismatch)
 
   | (FuryIsListEmpty(name)) -> print_res e ; let (env2, list2) = lookup name env in (match list2 with
-                                                        | FuryList(ls) -> if (List.length ls)=0 then FuryBool(true) else FuryBool(false)
+                                                        | FuryList(ls) -> if (List.length ls)=0 then FuryBool(false) else FuryBool(true)
                                                         | _ -> raise TypeMismatch )
 
   | (FuryRead(name)) -> print_res e ; let (env2, value2) = lookup name env in

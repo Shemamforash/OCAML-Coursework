@@ -44,7 +44,6 @@ expr:
 listoperator:
   | LISTADD VARIABLE primitives                                                            { FuryAddToList($2, $3) }
   | LISTGET VARIABLE primitives                                                            { FuryGetFromList($2, $3) }
-  | LISTEMPTY VARIABLE QUESTION                                                            { FuryIsListEmpty $2 }
 ;
 
 sequence:
@@ -57,12 +56,14 @@ declaration:
   | TYPE VARIABLE EQUALS primitives                                                        { FuryDeclare($1, $2, $4) }
   | VARIABLE EQUALS numericaloperator                                                      { FuryRebind($1, $3) }
   | LIST VARIABLE                                                                          { FuryListDeclare($2) }
+  | LIST VARIABLE EQUALS READ                                                              { FuryListDeclareWithRead($2) }
 ;
 
 primitives:
   | VARIABLE                                                                               { FuryVar $1}
   | INT                                                                                    { FuryPrimitive(FuryInt $1) }
   | numericaloperator                                                                      { $1 }
+  | listoperator                                                                           { $1 }
 ;
 
 numericaloperator:
@@ -77,6 +78,7 @@ conditional:
   | primitives LESSTHAN primitives QUESTION                                                { FuryLessThan($1, $3) }
   | primitives GREATERTHAN primitives QUESTION                                             { FuryMoreThan($1, $3) }
   | primitives EQUALTO primitives QUESTION                                                 { FuryEqualTo($1, $3) }
+  | LISTEMPTY VARIABLE QUESTION                                                            { FuryIsListEmpty $2 }
 ;
 
 forloop:

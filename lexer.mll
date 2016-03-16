@@ -33,7 +33,7 @@ rule lexer = parse
     | "war_party"                                 { LIST }
     | "ride_with"                                 { LISTADD }
     | "find_in"                                   { LISTGET }
-    | "is_war_party_disbanded"                    { LISTEMPTY }
+    | "is_war_party_riding"                       { LISTEMPTY }
 
     (* IO tokens *)
     | "witness"                                   { WRITE }
