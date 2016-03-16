@@ -29,5 +29,5 @@ let readstream () : int list=
 
 let rec write argument = match argument with
   | [] -> print_string ""
-  | hd::[] -> print_int hd
+  | hd::[] -> print_int hd ; print_string "\n"
   | hd::tl -> print_int hd ; print_string " " ; write tl

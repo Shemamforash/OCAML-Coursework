@@ -1,0 +1,11 @@
+intperator theaccumulator becomes 0
+
+i_live
+  war_party thescrapgatherers becomes read
+i_die
+  is_war_party_riding thescrapgatherers ?
+i_live_again
+  intperator temporusrex becomes find_in thescrapgatherers 0          V8
+  theaccumulator becomes temporusrex increase_speed_by theaccumulator V8
+  witness theaccumulator                                              V8
+  thescrapgatherers becomes read

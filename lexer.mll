@@ -30,7 +30,7 @@ rule lexer = parse
     | "V8"                                        { BREAK }
 
     (* list operators *)
-    | "war_party"                                 { LIST }
+    | "war_party" as lxm                          { TYPE(stringtotype lxm) }
     | "ride_with"                                 { LISTADD }
     | "find_in"                                   { LISTGET }
     | "is_war_party_riding"                       { LISTEMPTY }

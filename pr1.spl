@@ -1,5 +1,4 @@
-war_party thelistener
-ride_with thelistener 0
+witness 0
 
 i_live
   war_party thegreatprefixer becomes read
@@ -7,7 +6,5 @@ i_die
   is_war_party_riding thegreatprefixer ?
 i_live_again
   intperator temporusrex becomes find_in thegreatprefixer 0 V8
-  ride_with thelistener temporusrex V8
+  witness temporusrex V8
   thegreatprefixer becomes read
-
-witness thelistener

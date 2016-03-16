@@ -18,8 +18,8 @@ let arg =
         let result = main lexer lexbuf
         in match result with
         | FuryTerm e -> let evaluated = (evaluate root e) in (match evaluated with
-                    | FuryNull -> print_string "\n\n"
-                    | _ -> print_primitive evaluated ; print_string "\n\n" ; flush stdout)
+                    | FuryNull -> print_string ""
+                    | _ -> print_primitive evaluated ; print_string "\n" ; flush stdout)
         | Nothing -> ()
       with
       | Parsing.Parse_error -> (let curr = lexbuf.Lexing.lex_curr_p in

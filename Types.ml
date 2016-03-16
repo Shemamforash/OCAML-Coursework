@@ -1,6 +1,6 @@
 exception NonBaseTypeResult;;
 
-let viewtrace = true;;
+let viewtrace = false;;
 
 type furytype = FINT | FLIST | FBOOL | FSTRING | FVOID | FFLOAT
 
@@ -28,26 +28,25 @@ and furyterm =
   | FuryIf of furyterm * (furyterm list) * (furyterm list)
 (*  | FuryFor of furyterm * furyterm * furyterm  *)
   | FuryVar of string
-  | FuryRead of string
-  | FuryWrite of string
-  | FuryDeclare of furytype * string * furyterm
+  | FuryRead
+  | FuryWrite of furyterm
+  | FuryDeclare of furytype * string
+  | FuryDeclareAndBind of furytype * string * furyterm
   | FuryRebind of string * furyterm
   | FuryFor of furyterm * furyterm * (furyterm list)
-  | FuryListDeclare of string
   | FuryAddToList of string * furyterm
   | FuryReplaceInList of string * furyterm
   | FuryGetFromList of string * furyterm
   | FuryIsListEmpty of string
-  | FuryListDeclareWithRead of string
 
 type environment =
-  | Environment of environment * ((string, furyprimitive) Hashtbl.t)
+  | Environment of environment * ((string, (furytype * furyprimitive)) Hashtbl.t)
   | NullEnvironment
 
 let stringtotype = function
   | "intperator" -> FINT
-  | "war_rig" -> FLIST
-  | _ -> print_string "waffle" ; failwith "Not a type";;
+  | "war_party" -> FLIST
+  | _ -> failwith "Not a type";;
 
 let typetostring = function
   | FBOOL -> "bool"
@@ -84,15 +83,14 @@ let rec print_res res = if viewtrace then (match res with
   | (FuryTimes(e1, e2)) -> print_string "operation \"" ; print_res e1 ; print_string " x " ; print_res e2 ; print_string "\" evaluates to "
   | (FuryIf(e1,e2, e3)) -> print_string "if " ; print_res e1 ; print_string "true \n   then evaluate " ; exprlisttostring e2 ; print_string " \n   else evaluate " ; exprlisttostring e3
   | (FuryFor(e1, e2, e3)) -> print_string "start loop by " ; print_res e1 ; print_string "\n then while " ; print_res e2; print_string "\n is true, do " ; exprlisttostring e3
-  | (FuryRead e1) -> print_string ("reading stream into" ^ e1)
-  | (FuryWrite(n)) -> print_string ("writing " ^ n)
-  | (FuryDeclare(e1, e2, e3)) -> print_string ("binding new variable \"" ^ e2 ^ "\" as ") ; print_res e3
+  | (FuryRead) -> print_string ("reading line from stdin")
+  | (FuryWrite(n)) -> print_string ("writing ") ; print_res n
+  | (FuryDeclareAndBind(e1, e2, e3)) -> print_string ("binding new variable \"" ^ e2 ^ "\" as ") ; print_res e3
+  | (FuryDeclare(e1, e2)) -> print_string ("declaring new " ^ typetostring e1 ^ " as \"" ^ e2)
   | (FuryRebind(e1, e2)) -> print_string ("rebinding " ^ e1 ^ " as ") ; print_res e2
-  | (FuryListDeclare(e1)) -> print_string ("binding new list " ^ e1)
   | (FuryAddToList(e1, e2)) -> print_string "adding " ; print_res e2 ; print_string (" to list " ^ e1)
   | (FuryGetFromList(e1, e2)) -> print_string ("element in list " ^ e1 ^ " at position ") ; print_res e2 ; print_string " is "
   | (FuryIsListEmpty e1) -> print_string ("list " ^ e1 ^ " is empty? evaluates to ")
-  | (FuryListDeclareWithRead name) -> print_string ("binding new list" ^ name ^ " as ")
   | _ -> raise NonBaseTypeResult) else print_string ""
 
 and exprlisttostring = function
