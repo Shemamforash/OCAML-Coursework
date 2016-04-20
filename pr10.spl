@@ -1,0 +1,22 @@
+intperator enn becomes 0
+war_party previoso
+
+i_live
+  war_party delayer becomes read
+i_die
+  is_war_party_riding delayer ?
+i_live_again
+/ intperator some becomes 0 V8
+    am_i_awaited
+      enn is_immortan_to 1 ?
+    then_ride_eternal_shiny_and_chrome
+      intperator awarboy becomes find_in delayer 0 V8
+      intperator doublelast becomes enn decrease_speed_by 2 V8
+      intperator bside becomes find_in previoso doublelast V8
+      some becomes awarboy increase_speed_by bside
+    or_die_historic_on_fury_road
+    / some becomes find_in delayer 0 \ V8
+  enn becomes enn increase_speed_by 1 V8
+  ride_with previoso some V8
+  witness some V8
+  delayer becomes read \

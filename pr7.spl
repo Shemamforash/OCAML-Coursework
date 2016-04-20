@@ -1,0 +1,13 @@
+i_live
+  war_party copythestreamer becomes read
+i_die
+  is_war_party_riding copythestreamer ?
+i_live_again
+/ war_party thedelineater V8
+  intperator awarboy becomes find_in copythestreamer 0 V8
+  intperator bside becomes find_in copythestreamer 1 V8
+  intperator some becomes awarboy decrease_speed_by bside V8
+  ride_with thedelineater awarboy V8
+  ride_with thedelineater some V8
+  witness thedelineater V8
+  copythestreamer becomes read \

@@ -1,0 +1,17 @@
+war_party previoso
+ride_with previoso 0
+intperator enn becomes 0
+
+i_live
+  war_party copymeprefixer becomes read
+i_die
+  is_war_party_riding copymeprefixer ?
+i_live_again
+/ intperator thelast becomes find_in copymeprefixer 0 V8
+  ride_with previoso thelast V8
+  war_party thedelineater V8
+  ride_with thedelineater find_in previoso enn V8
+  ride_with thedelineater thelast V8
+  enn becomes enn increase_speed_by 1 V8
+  witness thedelineater V8
+  copymeprefixer becomes read \

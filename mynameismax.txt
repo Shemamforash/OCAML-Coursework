@@ -1,0 +1,5 @@
+A few years from now... 
+
+Object oriented programming is dead, functional languages and unbound variables roam the wasteland that remains. The laws of typing and scoping are forgotten, but one language live on.
+
+They call it the Fury Language.

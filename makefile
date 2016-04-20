@@ -9,7 +9,7 @@ SOURCES = \
   Furyroad.ml \
   Parser.mli Parser.mly Lexer.mll \
   Main.ml
-RESULT = result.exe
+RESULT = mysplinterpreter.exe
 OCAMLMAKEFILE = OCamlMakefile
 LIBS = str
 include $(OCAMLMAKEFILE)

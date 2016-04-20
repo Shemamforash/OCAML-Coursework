@@ -1,0 +1,14 @@
+intperator thelast becomes 0
+
+i_live
+  war_party thevilearithmetic becomes read
+i_die
+  is_war_party_riding thevilearithmetic ?
+i_live_again
+/ war_party thedelineater V8
+  intperator awarboy becomes find_in thevilearithmetic 0 V8
+  intperator some becomes thelast increase_speed_by awarboy V8
+  thelast becomes awarboy V8
+  ride_with thedelineater some V8
+  witness thedelineater V8
+  thevilearithmetic becomes read \

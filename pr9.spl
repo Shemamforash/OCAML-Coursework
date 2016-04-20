@@ -1,0 +1,21 @@
+intperator theaccumulator becomes 1
+war_party previoso
+
+i_live
+  war_party thenumerator becomes read
+i_die
+  is_war_party_riding thenumerator ?
+i_live_again
+/ intperator some becomes 0 V8
+  ride_with previoso find_in thenumerator 0 V8
+  i_live
+    intperator jay becomes theaccumulator
+  i_die
+    jay is_immortan_to 0 ?
+  i_live_again
+  / intperator thelast becomes find_in previoso theaccumulator decrease_speed_by jay V8
+    some becomes some increase_speed_by jay overcharged_by thelast V8
+    jay becomes jay decrease_speed_by 1 \ V8
+  theaccumulator becomes theaccumulator increase_speed_by 1 V8
+  witness some V8
+  thenumerator becomes read \
